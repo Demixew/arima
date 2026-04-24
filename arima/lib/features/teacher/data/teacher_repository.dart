@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../tasks/domain/task_item.dart';
+import '../domain/ai_task_draft.dart';
 import '../domain/linked_student.dart';
 import '../domain/task_submission.dart';
 import '../domain/teacher_metrics.dart';
@@ -91,5 +92,25 @@ class TeacherRepository {
 
   Future<void> unlinkStudent(int studentId) async {
     await _dio.delete<dynamic>('/teacher/students/$studentId/unlink');
+  }
+
+  Future<AITaskDraft> generateTaskDraft({
+    required int studentId,
+    required String prompt,
+  }) async {
+    try {
+      final Response<dynamic> response = await _dio.post<dynamic>(
+        '/teacher/ai/task-draft',
+        data: <String, dynamic>{
+          'student_id': studentId,
+          'prompt': prompt,
+        },
+      );
+      return AITaskDraft.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
   }
 }

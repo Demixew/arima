@@ -32,6 +32,18 @@ class GradeSubmissionRequest(BaseModel):
     grade: int = Field(ge=1, le=5, description="School grade from 1 to 5")
     feedback: str | None = None
 
+
+class AITaskDraftRequest(BaseModel):
+    student_id: int
+    prompt: str = Field(min_length=3, max_length=1000)
+
+
+class AITaskDraftResponse(BaseModel):
+    title: str
+    description: str
+    requires_submission: bool = False
+    model: str
+
 class TeacherStudentLinkResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)

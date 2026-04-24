@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     )
 
     ollama_url: str = Field(default="http://localhost:11434", alias="OLLAMA_URL")
+    ollama_model: str = Field(default="qwen3.5:4b", alias="OLLAMA_MODEL")
     cors_origins: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",

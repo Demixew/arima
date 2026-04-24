@@ -316,6 +316,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String daysAgo(int count) => '$count дн. назад';
   @override
   String gradeForStudent(String studentName) => 'Оценить: $studentName';
+  @override
+  String get aiAssistant => 'ИИ-помощник';
+  @override
+  String get aiTaskPromptLabel => 'Какое задание нужно создать?';
+  @override
+  String get aiTaskPromptHint =>
+      'Например: Создай мягкое задание по математике на дроби на завтра.';
+  @override
+  String get generateWithAi => 'Сгенерировать с ИИ';
+  @override
+  String get generatingDraft => 'Генерируем черновик...';
+  @override
+  String get applyAiDraft => 'Применить черновик';
+  @override
+  String get aiDraftReady => 'ИИ подготовил черновик';
+  @override
+  String get aiPromptRequired => 'Введите короткий запрос для ИИ';
+  @override
+  String aiModelLabel(String model) => 'Модель: $model';
 
   @override
   String get linkChild => 'Привязать ребенка';

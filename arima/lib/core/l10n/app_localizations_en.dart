@@ -314,6 +314,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String daysAgo(int count) => '$count days ago';
   @override
   String gradeForStudent(String studentName) => 'Grade $studentName';
+  @override
+  String get aiAssistant => 'AI Assistant';
+  @override
+  String get aiTaskPromptLabel => 'What task do you want to create?';
+  @override
+  String get aiTaskPromptHint =>
+      'Example: Create a gentle math practice task on fractions for tomorrow.';
+  @override
+  String get generateWithAi => 'Generate with AI';
+  @override
+  String get generatingDraft => 'Generating draft...';
+  @override
+  String get applyAiDraft => 'Apply AI draft';
+  @override
+  String get aiDraftReady => 'AI draft is ready';
+  @override
+  String get aiPromptRequired => 'Enter a short task request for AI';
+  @override
+  String aiModelLabel(String model) => 'Model: $model';
 
   @override
   String get linkChild => 'Link Child';

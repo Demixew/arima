@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/network/api_exception.dart';
+import '../data/teacher_repository.dart';
 import '../application/teacher_controller.dart';
+import '../domain/ai_task_draft.dart';
 import '../domain/linked_student.dart';
 import '../domain/task_submission.dart';
 import '../domain/teacher_metrics.dart';
@@ -342,15 +345,19 @@ class _AssignTaskTab extends ConsumerStatefulWidget {
 class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _aiPromptController = TextEditingController();
   int? _selectedStudentId;
   DateTime? _dueAt;
   bool _requiresSubmission = false;
   bool _isLoading = false;
+  bool _isGenerating = false;
+  AITaskDraft? _draft;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _aiPromptController.dispose();
     super.dispose();
   }
 
@@ -371,6 +378,9 @@ class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
     final canSubmit = !_isLoading &&
         _selectedStudentId != null &&
         _titleController.text.trim().isNotEmpty;
+    final canGenerate = !_isGenerating &&
+        _selectedStudentId != null &&
+        _aiPromptController.text.trim().isNotEmpty;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -390,6 +400,8 @@ class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
               color: theme.colorScheme.onSurface.withAlpha(153),
             ),
           ),
+          const SizedBox(height: 20),
+          _buildAiCard(theme, l10n, canGenerate),
           const SizedBox(height: 24),
           DropdownButtonFormField<int>(
             initialValue: _selectedStudentId,
@@ -409,7 +421,10 @@ class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
                 child: Text(student.studentName),
               );
             }).toList(),
-            onChanged: (value) => setState(() => _selectedStudentId = value),
+            onChanged: (value) => setState(() {
+              _selectedStudentId = value;
+              _draft = null;
+            }),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -524,6 +539,123 @@ class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
     );
   }
 
+  Widget _buildAiCard(
+    ThemeData theme,
+    AppLocalizations l10n,
+    bool canGenerate,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: theme.colorScheme.primary),
+              const SizedBox(width: 10),
+              Text(
+                l10n.aiAssistant,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _aiPromptController,
+            minLines: 2,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: l10n.aiTaskPromptLabel,
+              hintText: l10n.aiTaskPromptHint,
+              filled: true,
+              fillColor: theme.colorScheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: canGenerate ? _generateDraft : null,
+                  icon: _isGenerating
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.auto_awesome),
+                  label: Text(
+                    _isGenerating ? l10n.generatingDraft : l10n.generateWithAi,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_draft != null) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.aiDraftReady,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.aiModelLabel(_draft!.model),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    _draft!.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(_draft!.description),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: _applyDraft,
+                      icon: const Icon(Icons.download_done),
+                      label: Text(l10n.applyAiDraft),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Future<void> _pickDueDate() async {
     final date = await showDatePicker(
       context: context,
@@ -589,6 +721,58 @@ class _AssignTaskTabState extends ConsumerState<_AssignTaskTab> {
         SnackBar(content: Text('${l10n.somethingWentWrong}: $error')),
       );
     }
+  }
+
+  Future<void> _generateDraft() async {
+    final l10n = AppLocalizations.of(context)!;
+    final studentId = _selectedStudentId;
+    final prompt = _aiPromptController.text.trim();
+
+    if (studentId == null || prompt.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.aiPromptRequired)),
+      );
+      return;
+    }
+
+    setState(() => _isGenerating = true);
+    try {
+      final draft = await ref.read(teacherRepositoryProvider).generateTaskDraft(
+            studentId: studentId,
+            prompt: prompt,
+          );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _draft = draft;
+        _isGenerating = false;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      final message = error is ApiException
+          ? error.message
+          : '${l10n.somethingWentWrong}: $error';
+      setState(() => _isGenerating = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
+  void _applyDraft() {
+    final draft = _draft;
+    if (draft == null) {
+      return;
+    }
+
+    setState(() {
+      _titleController.text = draft.title;
+      _descriptionController.text = draft.description;
+      _requiresSubmission = draft.requiresSubmission;
+    });
   }
 }
 

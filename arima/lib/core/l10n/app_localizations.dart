@@ -183,6 +183,15 @@ abstract class AppLocalizations {
   String hoursAgo(int count);
   String daysAgo(int count);
   String gradeForStudent(String studentName);
+  String get aiAssistant;
+  String get aiTaskPromptLabel;
+  String get aiTaskPromptHint;
+  String get generateWithAi;
+  String get generatingDraft;
+  String get applyAiDraft;
+  String get aiDraftReady;
+  String get aiPromptRequired;
+  String aiModelLabel(String model);
 
   String get linkChild;
   String get childEmail;

@@ -15,6 +15,8 @@ from backend.models.task import Task
 from backend.models.user import User, UserRole
 from backend.models.metrics import TaskSubmission, TeacherStudentLink, UserMetrics
 from backend.schemas.teacher import (
+    AITaskDraftRequest,
+    AITaskDraftResponse,
     GradeSubmissionRequest,
     LinkedStudentResponse,
     TaskSubmissionResponse,
@@ -23,6 +25,7 @@ from backend.schemas.teacher import (
 )
 from backend.schemas.task import TaskResponse
 from backend.services import metrics_service
+from backend.services.ollama_service import generate_personalized_task_draft
 
 router = APIRouter(prefix="/teacher", tags=["teacher"])
 
@@ -169,6 +172,42 @@ async def link_student(
     session.add(link)
     await session.commit()
     return {"status": "linked", "student_id": str(student.id)}
+
+
+@router.post("/ai/task-draft", response_model=AITaskDraftResponse)
+async def create_ai_task_draft(
+    payload: AITaskDraftRequest,
+    current_user: User = Depends(_get_teacher_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> AITaskDraftResponse:
+    link_result = await session.execute(
+        select(TeacherStudentLink)
+        .options(selectinload(TeacherStudentLink.student))
+        .where(
+            TeacherStudentLink.teacher_id == current_user.id,
+            TeacherStudentLink.student_id == payload.student_id,
+            TeacherStudentLink.status == "active",
+        )
+    )
+    link = link_result.scalar_one_or_none()
+    if not link or link.student is None:
+        raise HTTPException(status_code=403, detail="Student not linked to you")
+
+    metrics_result = await session.execute(
+        select(UserMetrics).where(UserMetrics.user_id == payload.student_id)
+    )
+    metrics = metrics_result.scalar_one_or_none()
+
+    draft = await generate_personalized_task_draft(
+        teacher_name=current_user.full_name,
+        student_name=link.student.full_name,
+        prompt=payload.prompt,
+        completion_rate=metrics.completion_rate if metrics else None,
+        current_streak=metrics.current_streak if metrics else None,
+        total_completed=metrics.total_tasks_completed if metrics else None,
+        total_created=metrics.total_tasks_created if metrics else None,
+    )
+    return AITaskDraftResponse(**draft)
 
 @router.delete("/students/{student_id}/unlink")
 async def unlink_student(
