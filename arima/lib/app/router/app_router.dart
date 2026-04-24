@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/app_localizations.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/domain/auth_session.dart';
 import '../../features/auth/presentation/auth_bootstrap_page.dart';
@@ -32,8 +33,9 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((Ref ref) {
       GoRoute(
         path: '/student',
         name: 'studentHome',
-        builder: (BuildContext context, GoRouterState state) =>
-            const HomePage(title: 'Student Workspace'),
+        builder: (BuildContext context, GoRouterState state) => HomePage(
+          title: AppLocalizations.of(context)?.studentWorkspace,
+        ),
       ),
       GoRoute(
         path: '/teacher',

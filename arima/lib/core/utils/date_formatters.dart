@@ -1,13 +1,18 @@
 import 'package:intl/intl.dart';
 
+import '../l10n/app_localizations.dart';
+
 class DateFormatters {
   const DateFormatters._();
 
-  static String shortDateTime(DateTime? value) {
+  static String shortDateTime(DateTime? value, {AppLocalizations? l10n}) {
     if (value == null) {
-      return 'No deadline';
+      return l10n?.noDeadlineValue() ?? 'No deadline';
     }
 
-    return DateFormat('dd MMM, HH:mm').format(value.toLocal());
+    return DateFormat(
+      'dd MMM, HH:mm',
+      l10n?.locale.languageCode,
+    ).format(value.toLocal());
   }
 }

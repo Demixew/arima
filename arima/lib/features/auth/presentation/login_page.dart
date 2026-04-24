@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/network/api_exception.dart';
 import '../application/auth_controller.dart';
 
@@ -92,25 +93,25 @@ class _LoginPageState extends ConsumerState<LoginPage>
     });
   }
 
-  bool _validateFields() {
+  bool _validateFields(AppLocalizations l10n) {
     bool isValid = true;
 
     if (_emailController.text.trim().isEmpty) {
-      setState(() => _emailError = 'Email is required');
+      setState(() => _emailError = l10n.emailRequired);
       isValid = false;
     } else if (!_emailController.text.contains('@') ||
         !_emailController.text.contains('.')) {
-      setState(() => _emailError = 'Enter a valid email');
+      setState(() => _emailError = l10n.emailInvalid);
       isValid = false;
     } else {
       setState(() => _emailError = null);
     }
 
     if (_passwordController.text.isEmpty) {
-      setState(() => _passwordError = 'Password is required');
+      setState(() => _passwordError = l10n.passwordRequired);
       isValid = false;
     } else if (_passwordController.text.length < 8) {
-      setState(() => _passwordError = 'Password must be at least 8 characters');
+      setState(() => _passwordError = l10n.passwordTooShort);
       isValid = false;
     } else {
       setState(() => _passwordError = null);
@@ -118,7 +119,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     if (_isRegister) {
       if (_nameController.text.trim().isEmpty) {
-        setState(() => _nameError = 'Full name is required');
+        setState(() => _nameError = l10n.fullNameRequired);
         isValid = false;
       } else {
         setState(() => _nameError = null);
@@ -129,7 +130,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _submit() async {
-    if (!_validateFields()) {
+    final l10n = AppLocalizations.of(context)!;
+    if (!_validateFields(l10n)) {
       _shakeController.forward(from: 0);
       return;
     }
@@ -164,13 +166,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
     if (errorText != null) {
       setState(() {
         if (errorText.contains('Invalid email or password')) {
-          _errorMessage = 'Invalid email or password. Please try again.';
-          _emailError = 'Invalid credentials';
-          _passwordError = 'Invalid credentials';
+          _errorMessage = l10n.invalidEmailOrPassword;
+          _emailError = l10n.invalidCredentials;
+          _passwordError = l10n.invalidCredentials;
           _shakeController.forward(from: 0);
         } else if (errorText.contains('already exists')) {
-          _errorMessage = 'An account with this email already exists';
-          _emailError = 'Already registered';
+          _errorMessage = l10n.accountExists;
+          _emailError = l10n.accountExists;
         } else {
           _errorMessage = errorText;
         }
@@ -243,6 +245,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildInfoPanel(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       constraints: const BoxConstraints(maxWidth: 380),
@@ -296,7 +300,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               ),
               const SizedBox(width: 16),
               Text(
-                'Arima',
+                l10n.appTitle,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -309,7 +313,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: Text(
-              _isRegister ? 'Create your account' : 'Welcome back!',
+              _isRegister ? l10n.createAccount : l10n.welcomeBack,
               key: ValueKey(_isRegister),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
@@ -322,8 +326,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
             duration: const Duration(milliseconds: 300),
             child: Text(
               _isRegister
-                  ? 'Start tracking your tasks and get smart reminders.'
-                  : 'Sign in to continue your progress.',
+                  ? l10n.addFirstTaskHint
+                  : l10n.signIn,
               key: ValueKey('$_isRegister-desc'),
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: Colors.white.withValues(alpha: 0.9),
@@ -339,9 +343,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildFeatureChip(theme, Icons.assignment_rounded, 'Tasks'),
-                _buildFeatureChip(theme, Icons.notifications_active_rounded, 'Reminders'),
-                _buildFeatureChip(theme, Icons.psychology_rounded, 'AI'),
+                _buildFeatureChip(theme, Icons.assignment_rounded, l10n.tasksTab),
+                _buildFeatureChip(theme, Icons.notifications_active_rounded, l10n.notifications),
+                _buildFeatureChip(
+                  theme,
+                  Icons.psychology_rounded,
+                  l10n.appFeatureAi,
+                ),
               ],
             ),
           ),
@@ -393,6 +401,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildAuthCard(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AnimatedBuilder(
       animation: _shakeAnimation,
       builder: (context, child) {
@@ -433,7 +443,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   return FadeTransition(opacity: animation, child: child);
                 },
                 child: Text(
-                  _isRegister ? 'Create Account' : 'Sign In',
+                  _isRegister ? l10n.register : l10n.signIn,
                   key: ValueKey(_isRegister),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -446,8 +456,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 duration: const Duration(milliseconds: 300),
                 child: Text(
                   _isRegister
-                      ? 'Fill in your details to get started'
-                      : 'Enter your credentials to continue',
+                      ? l10n.createAccountSubtitle
+                      : l10n.signInSubtitle,
                   key: ValueKey('$_isRegister-subtitle'),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -460,7 +470,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                 _buildTextField(
                   theme: theme,
                   controller: _nameController,
-                  label: 'Full Name',
+                  label: l10n.fullNameLabel,
                   icon: Icons.person_outline_rounded,
                   error: _nameError,
                   textInputAction: TextInputAction.next,
@@ -470,7 +480,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               _buildTextField(
                 theme: theme,
                 controller: _emailController,
-                label: 'Email',
+                label: l10n.emailLabel,
                 icon: Icons.email_outlined,
                 error: _emailError,
                 keyboardType: TextInputType.emailAddress,
@@ -480,7 +490,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               _buildTextField(
                 theme: theme,
                 controller: _passwordController,
-                label: 'Password',
+                label: l10n.passwordLabel,
                 icon: Icons.lock_outline_rounded,
                 error: _passwordError,
                 obscureText: _obscurePassword,
@@ -606,10 +616,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildRoleSelector(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return DropdownButtonFormField<String>(
       initialValue: _roleController.text,
       decoration: InputDecoration(
-        labelText: 'I am a...',
+        labelText: l10n.roleLabel,
         prefixIcon: const Icon(Icons.badge_outlined),
         filled: true,
         fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
@@ -619,14 +631,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       ),
-      items: const [
+      items: [
         DropdownMenuItem(
           value: 'student',
           child: Row(
             children: [
-              Icon(Icons.school_outlined, size: 20),
-              SizedBox(width: 10),
-              Text('Student'),
+              const Icon(Icons.school_outlined, size: 20),
+              const SizedBox(width: 10),
+              Text(l10n.roleStudent),
             ],
           ),
         ),
@@ -634,9 +646,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
           value: 'teacher',
           child: Row(
             children: [
-              Icon(Icons.cast_for_education_outlined, size: 20),
-              SizedBox(width: 10),
-              Text('Teacher'),
+              const Icon(Icons.cast_for_education_outlined, size: 20),
+              const SizedBox(width: 10),
+              Text(l10n.roleTeacher),
             ],
           ),
         ),
@@ -644,9 +656,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
           value: 'parent',
           child: Row(
             children: [
-              Icon(Icons.family_restroom_outlined, size: 20),
-              SizedBox(width: 10),
-              Text('Parent'),
+              const Icon(Icons.family_restroom_outlined, size: 20),
+              const SizedBox(width: 10),
+              Text(l10n.roleParent),
             ],
           ),
         ),
@@ -716,6 +728,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildSubmitButton(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 600),
@@ -754,7 +768,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      _isRegister ? 'Create Account' : 'Sign In',
+                      _isRegister ? l10n.createAccountButton : l10n.signInButton,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -770,11 +784,13 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Widget _buildToggleButton(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          _isRegister ? 'Already have an account?' : "Don't have an account?",
+          _isRegister ? l10n.alreadyHaveAccount : l10n.dontHaveAccount,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -785,7 +801,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             padding: const EdgeInsets.symmetric(horizontal: 8),
           ),
           child: Text(
-            _isRegister ? 'Sign in' : 'Register',
+            _isRegister ? l10n.signInButton : l10n.register,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.primary,

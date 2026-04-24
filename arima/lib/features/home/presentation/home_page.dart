@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/language_selector.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../tasks/application/task_list_controller.dart';
 import '../../tasks/application/task_mutation_controller.dart';
@@ -10,15 +12,16 @@ import '../../tasks/domain/task_status.dart';
 import '../../tasks/presentation/task_form_dialog.dart';
 
 class HomePage extends ConsumerStatefulWidget {
-  const HomePage({required this.title, super.key});
+  const HomePage({this.title, super.key});
 
-  final String title;
+  final String? title;
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends ConsumerState<HomePage>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
 
   late final AnimationController _fabController;
@@ -47,6 +50,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Container(
@@ -71,7 +75,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               child: FloatingActionButton.extended(
                 onPressed: _showAddTaskDialog,
                 icon: const Icon(Icons.add),
-                label: const Text('Add Task'),
+                label: Text(l10n.addTask),
                 elevation: 4,
               ),
             )
@@ -80,6 +84,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildNavigationBar(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return NavigationBar(
       selectedIndex: _selectedIndex,
       onDestinationSelected: (index) {
@@ -89,23 +95,24 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         NavigationDestination(
           icon: const Icon(Icons.checklist_outlined),
           selectedIcon: Icon(Icons.checklist, color: theme.colorScheme.primary),
-          label: 'Tasks',
+          label: l10n.tasksTab,
         ),
         NavigationDestination(
           icon: const Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person, color: theme.colorScheme.primary),
-          label: 'Profile',
+          label: l10n.profileTab,
         ),
         NavigationDestination(
           icon: const Icon(Icons.bar_chart_outlined),
           selectedIcon: Icon(Icons.bar_chart, color: theme.colorScheme.primary),
-          label: 'Stats',
+          label: l10n.statsTab,
         ),
       ],
     );
   }
 
   Widget _buildBody(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final tasksAsync = ref.watch(taskListControllerProvider);
 
     return CustomScrollView(
@@ -113,34 +120,36 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         _buildAppBar(theme),
         switch (_selectedIndex) {
           0 => tasksAsync.when(
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, _) => SliverFillRemaining(
-              child: _buildErrorState(theme, error),
-            ),
-            data: (tasks) => tasks.isEmpty
-              ? SliverFillRemaining(child: _buildEmptyState(theme))
-              : SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildTaskCard(theme, tasks[index], index),
-                      childCount: tasks.length,
+              loading: () => const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, _) => SliverFillRemaining(
+                child: _buildErrorState(theme, error),
+              ),
+              data: (tasks) => tasks.isEmpty
+                  ? SliverFillRemaining(child: _buildEmptyState(theme))
+                  : SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) =>
+                              _buildTaskCard(theme, tasks[index], index),
+                          childCount: tasks.length,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-          ),
+            ),
           1 => SliverFillRemaining(child: _buildProfile(theme)),
           2 => tasksAsync.when(
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              loading: () => const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (_, __) => SliverFillRemaining(
+                child: Center(child: Text(l10n.errorLoadingStats)),
+              ),
+              data: (tasks) =>
+                  SliverFillRemaining(child: _buildStats(theme, tasks)),
             ),
-            error: (_, __) => const SliverFillRemaining(
-              child: Center(child: Text('Error loading stats')),
-            ),
-            data: (tasks) => SliverFillRemaining(child: _buildStats(theme, tasks)),
-          ),
           _ => const SliverFillRemaining(child: SizedBox.shrink()),
         },
       ],
@@ -148,8 +157,10 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildAppBar(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final authSession = ref.watch(authControllerProvider);
-    final userName = authSession.valueOrNull?.user.fullName ?? 'User';
+    final userName =
+        authSession.valueOrNull?.user.fullName ?? l10n.roleStudent;
 
     return SliverAppBar(
       expandedHeight: 140,
@@ -161,15 +172,15 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         title: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            children: [
+              Text(
+                widget.title ?? l10n.studentWorkspace,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
             ),
             Text(
-              'Hello, ${userName.split(' ').first}!',
+              '${l10n.hello}, ${userName.split(' ').first}!',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
@@ -180,19 +191,22 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),
-          onPressed: () => ref.read(taskListControllerProvider.notifier).refresh(),
-          tooltip: 'Refresh',
+          onPressed: () =>
+              ref.read(taskListControllerProvider.notifier).refresh(),
+          tooltip: l10n.refresh,
         ),
         IconButton(
           icon: const Icon(Icons.logout),
           onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-          tooltip: 'Logout',
+          tooltip: l10n.logout,
         ),
       ],
     );
   }
 
   Widget _buildErrorState(ThemeData theme, Object error) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -211,7 +225,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
           ),
           const SizedBox(height: 24),
           Text(
-            'Something went wrong',
+            l10n.somethingWentWrongRetry,
             style: theme.textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
@@ -224,9 +238,10 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => ref.read(taskListControllerProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(taskListControllerProvider.notifier).refresh(),
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(l10n.retry),
           ),
         ],
       ),
@@ -234,6 +249,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildEmptyState(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -248,30 +265,30 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                 child: child,
               );
             },
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.task_alt,
-                  size: 80,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                ),
+            child: Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color:
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
               ),
-
+              child: Icon(
+                Icons.task_alt,
+                size: 80,
+                color: theme.colorScheme.primary.withValues(alpha: 0.7),
+              ),
+            ),
           ),
           const SizedBox(height: 32),
           Text(
-            'No tasks yet',
+            l10n.noTasksYet,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Tap + to add your first task\nand start tracking your progress',
+            l10n.addFirstTaskHint,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
@@ -283,6 +300,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildTaskCard(ThemeData theme, TaskItem task, int index) {
+    final l10n = AppLocalizations.of(context)!;
     final isCompleted = task.status == TaskStatus.completed;
     final isOverdue = task.dueAt != null &&
         task.dueAt!.isBefore(DateTime.now()) &&
@@ -358,16 +376,19 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                                     ? TextDecoration.lineThrough
                                     : null,
                                 color: isCompleted
-                                    ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
+                                    ? theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.5)
                                     : null,
                               ),
                             ),
-                            if (task.description != null && task.description!.isNotEmpty) ...[
+                            if (task.description != null &&
+                                task.description!.isNotEmpty) ...[
                               const SizedBox(height: 4),
                               Text(
                                 task.description!,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -376,17 +397,19 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                           ],
                         ),
                       ),
-                      _buildStatusBadge(theme, task.status, statusColor),
+                      _buildStatusBadge(theme, task.status, statusColor, l10n),
                     ],
                   ),
-                  if (task.requiresSubmission && !isCompleted && task.submission == null) ...[
+                  if (task.requiresSubmission &&
+                      !isCompleted &&
+                      task.submission == null) ...[
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton.icon(
                         onPressed: () => _showSubmitDialog(task),
                         icon: const Icon(Icons.send),
-                        label: const Text('Submit Task'),
+                        label: Text(l10n.submitTask),
                         style: FilledButton.styleFrom(
                           backgroundColor: theme.colorScheme.secondary,
                           foregroundColor: theme.colorScheme.onSecondary,
@@ -404,7 +427,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                     const SizedBox(height: 12),
                     if (task.reminder?.escalatedToParent == true) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.red.shade50,
                           borderRadius: BorderRadius.circular(10),
@@ -412,11 +436,13 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
+                            Icon(Icons.warning_amber_rounded,
+                                size: 18, color: Colors.red.shade700),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                task.reminder?.parentAlertMessage ?? 'Parent has been alerted!',
+                                task.reminder?.parentAlertMessage ??
+                                    l10n.parentAlerted,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.red.shade700,
                                   fontWeight: FontWeight.w600,
@@ -434,11 +460,13 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                           Icon(
                             Icons.calendar_today,
                             size: 14,
-                            color: isOverdue ? Colors.red : theme.colorScheme.primary,
+                            color: isOverdue
+                                ? Colors.red
+                                : theme.colorScheme.primary,
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            _formatDateTime(task.dueAt!),
+                            _formatDateTime(task.dueAt!, l10n),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isOverdue
                                   ? Colors.red
@@ -448,7 +476,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                           ),
                           const SizedBox(width: 16),
                         ],
-                        if (task.reminder != null && task.reminder!.isEnabled) ...[
+                        if (task.reminder != null &&
+                            task.reminder!.isEnabled) ...[
                           Icon(
                             Icons.notifications_active,
                             size: 14,
@@ -459,8 +488,11 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                           const SizedBox(width: 6),
                           Text(
                             task.reminder!.escalatedToParent
-                                ? 'Escalated!'
-                                : '${task.reminder!.missedCount}/${task.reminder!.maxMissedCount} misses',
+                                ? l10n.escalatedToParent
+                                : l10n.reminderProgress(
+                                    task.reminder!.missedCount,
+                                    task.reminder!.maxMissedCount,
+                                  ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: task.reminder!.escalatedToParent
                                   ? Colors.red
@@ -502,16 +534,17 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     );
   }
 
-  Widget _buildStatusBadge(ThemeData theme, TaskStatus status, Color color) {
+  Widget _buildStatusBadge(
+      ThemeData theme, TaskStatus status, Color color, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withAlpha(77)),
       ),
       child: Text(
-        status.label,
+        status.label(l10n),
         style: TextStyle(
           color: color,
           fontSize: 11,
@@ -523,13 +556,14 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
 
   Widget _buildProfile(ThemeData theme) {
     final authSession = ref.watch(authControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return authSession.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Error loading profile')),
+      error: (_, __) => Center(child: Text(l10n.errorLoadingProfile)),
       data: (session) {
         if (session == null) {
-          return const Center(child: Text('Not logged in'));
+          return Center(child: Text(l10n.notLoggedIn));
         }
 
         return SingleChildScrollView(
@@ -587,7 +621,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -607,7 +642,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      session.user.role.label,
+                      _roleLabel(session.user.role.name, l10n),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -619,26 +654,32 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               const SizedBox(height: 48),
               _buildProfileMenuItem(
                 theme,
+                Icons.language_outlined,
+                l10n.language,
+                _showLanguageDialog,
+              ),
+              _buildProfileMenuItem(
+                theme,
                 Icons.person_outline,
-                'Edit Profile',
+                l10n.editProfile,
                 () {},
               ),
               _buildProfileMenuItem(
                 theme,
                 Icons.notifications_outlined,
-                'Notifications',
+                l10n.notifications,
                 () {},
               ),
               _buildProfileMenuItem(
                 theme,
                 Icons.lock_outline,
-                'Privacy & Security',
+                l10n.privacySecurity,
                 () {},
               ),
               _buildProfileMenuItem(
                 theme,
                 Icons.help_outline,
-                'Help & Support',
+                l10n.helpSupport,
                 () {},
               ),
             ],
@@ -661,7 +702,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     }
   }
 
-  Widget _buildProfileMenuItem(ThemeData theme, IconData icon, String label, VoidCallback onTap) {
+  Widget _buildProfileMenuItem(
+      ThemeData theme, IconData icon, String label, VoidCallback onTap) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
@@ -681,15 +723,19 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildStats(ThemeData theme, List<TaskItem> tasks) {
-    final completed = tasks.where((t) => t.status == TaskStatus.completed).length;
+    final l10n = AppLocalizations.of(context)!;
+    final completed =
+        tasks.where((t) => t.status == TaskStatus.completed).length;
     final total = tasks.length;
-    final inProgress = tasks.where((t) => t.status == TaskStatus.inProgress).length;
+    final inProgress =
+        tasks.where((t) => t.status == TaskStatus.inProgress).length;
     final pending = tasks.where((t) => t.status == TaskStatus.pending).length;
-    final overdue = tasks.where((t) =>
-        t.dueAt != null &&
-        t.dueAt!.isBefore(DateTime.now()) &&
-        t.status != TaskStatus.completed
-    ).length;
+    final overdue = tasks
+        .where((t) =>
+            t.dueAt != null &&
+            t.dueAt!.isBefore(DateTime.now()) &&
+            t.status != TaskStatus.completed)
+        .length;
 
     final completionRate = total > 0 ? (completed / total * 100).round() : 0;
 
@@ -699,7 +745,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Progress',
+            l10n.yourProgress,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -708,7 +754,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
           _buildProgressCard(theme, completionRate, completed, total),
           const SizedBox(height: 24),
           Text(
-            'Task Overview',
+            l10n.taskOverview,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -719,7 +765,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               Expanded(
                 child: _buildStatTile(
                   theme,
-                  'Total',
+                  l10n.total,
                   total.toString(),
                   Icons.list_alt,
                   theme.colorScheme.primary,
@@ -729,7 +775,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               Expanded(
                 child: _buildStatTile(
                   theme,
-                  'Completed',
+                  l10n.completed,
                   completed.toString(),
                   Icons.check_circle,
                   Colors.green,
@@ -743,7 +789,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               Expanded(
                 child: _buildStatTile(
                   theme,
-                  'In Progress',
+                  l10n.inProgress,
                   inProgress.toString(),
                   Icons.pending,
                   Colors.orange,
@@ -753,7 +799,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               Expanded(
                 child: _buildStatTile(
                   theme,
-                  'Pending',
+                  l10n.pending,
                   pending.toString(),
                   Icons.hourglass_empty,
                   Colors.blue,
@@ -764,7 +810,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
           const SizedBox(height: 12),
           _buildStatTile(
             theme,
-            'Overdue',
+            l10n.overdue,
             overdue.toString(),
             Icons.warning,
             Colors.red,
@@ -775,7 +821,9 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     );
   }
 
-  Widget _buildProgressCard(ThemeData theme, int percentage, int completed, int total) {
+  Widget _buildProgressCard(
+      ThemeData theme, int percentage, int completed, int total) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -792,7 +840,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Completion Rate',
+                  l10n.completionRate,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -820,7 +868,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                         value: value,
                         minHeight: 12,
                         backgroundColor: theme.colorScheme.primaryContainer,
-                        valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
+                        valueColor:
+                            AlwaysStoppedAnimation(theme.colorScheme.primary),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -828,16 +877,17 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '$completed completed',
+                          '$completed ${l10n.completed}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.green,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          '${total - completed} remaining',
+                          '${total - completed} ${l10n.remaining}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -904,7 +954,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     );
   }
 
-  String _formatDateTime(DateTime dt) {
+  String _formatDateTime(DateTime dt, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
@@ -912,14 +962,15 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
 
     String dayStr;
     if (dueDay == today) {
-      dayStr = 'Today';
+      dayStr = l10n.today;
     } else if (dueDay == tomorrow) {
-      dayStr = 'Tomorrow';
+      dayStr = l10n.tomorrow;
     } else {
       dayStr = '${dt.day}/${dt.month}';
     }
 
-    final timeStr = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     return '$dayStr $timeStr';
   }
 
@@ -952,7 +1003,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               remindAfterHours: result.remindAfterHours,
               maxMissedCount: result.maxMissedCount,
             );
-   }
+      }
     });
   }
 
@@ -977,28 +1028,29 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   void _showSubmitDialog(TaskItem task) {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController controller = TextEditingController();
     showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Submit: ${task.title}'),
+        title: Text('${l10n.submitTaskTitle}: ${task.title}'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Your submission',
-            hintText: 'Enter your answer or submission text...',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.yourSubmission,
+            hintText: l10n.enterSubmissionHint,
+            border: const OutlineInputBorder(),
           ),
           maxLines: 5,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Submit'),
+            child: Text(l10n.submitTask),
           ),
         ],
       ),
@@ -1011,14 +1063,14 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               );
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Task submitted successfully!')),
+              SnackBar(content: Text(l10n.taskSubmittedSuccess)),
             );
           }
           ref.read(taskListControllerProvider.notifier).refresh();
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $e')),
+              SnackBar(content: Text('${l10n.somethingWentWrong}: $e')),
             );
           }
         }
@@ -1028,15 +1080,16 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Future<bool> _confirmDelete(TaskItem task) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: Text('Are you sure you want to delete "${task.title}"?'),
+        builder: (context) => AlertDialog(
+          title: Text(l10n.deleteTaskTitle),
+          content: Text(l10n.deleteTaskMessage(task.title)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -1044,7 +1097,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.deleteTask),
           ),
         ],
       ),
@@ -1056,20 +1109,21 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   Widget _buildSubmissionStatus(ThemeData theme, TaskItem task) {
+    final l10n = AppLocalizations.of(context)!;
     final submission = task.submission!;
     final isGraded = submission.isGraded;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isGraded 
-          ? Colors.green.withValues(alpha: 0.08)
-          : Colors.orange.withValues(alpha: 0.08),
+        color: isGraded
+            ? Colors.green.withValues(alpha: 0.08)
+            : Colors.orange.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isGraded 
-            ? Colors.green.withValues(alpha: 0.3)
-            : Colors.orange.withValues(alpha: 0.3),
+          color: isGraded
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -1084,7 +1138,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               ),
               const SizedBox(width: 8),
               Text(
-                isGraded ? 'Graded' : 'Submitted',
+                isGraded ? l10n.graded : l10n.submitted,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: isGraded ? Colors.green : Colors.orange,
@@ -1093,13 +1147,14 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               if (isGraded && submission.grade != null) ...[
                 const SizedBox(width: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Grade: ${submission.grade}',
+                    l10n.gradeValue(submission.grade!),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -1110,17 +1165,20 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               ],
             ],
           ),
-          if (submission.submissionText != null && submission.submissionText!.isNotEmpty) ...[
+          if (submission.submissionText != null &&
+              submission.submissionText!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              'Your answer: ${submission.submissionText}',
+              l10n.yourAnswerValue(submission.submissionText!),
               style: TextStyle(
                 fontSize: 13,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
-          if (isGraded && submission.feedback != null && submission.feedback!.isNotEmpty) ...[
+          if (isGraded &&
+              submission.feedback != null &&
+              submission.feedback!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(10),
@@ -1131,14 +1189,16 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.comment, size: 14, color: theme.colorScheme.primary),
+                  Icon(Icons.comment,
+                      size: 14, color: theme.colorScheme.primary),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Teacher feedback: ${submission.feedback}',
+                      l10n.teacherFeedbackValue(submission.feedback!),
                       style: TextStyle(
                         fontSize: 13,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.8),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -1147,6 +1207,43 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  String _roleLabel(String role, AppLocalizations l10n) {
+    switch (role) {
+      case 'student':
+        return l10n.roleStudent;
+      case 'teacher':
+        return l10n.roleTeacher;
+      case 'parent':
+        return l10n.roleParent;
+      default:
+        return role;
+    }
+  }
+
+  void _showLanguageDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.language),
+        content: const SizedBox(
+          width: double.maxFinite,
+          child: LanguageSelector(
+            showLabel: false,
+            padding: EdgeInsets.zero,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
         ],
       ),
     );

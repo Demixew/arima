@@ -1,3 +1,5 @@
+import '../../../core/l10n/app_localizations.dart';
+
 enum TaskStatus {
   pending,
   inProgress,
@@ -17,16 +19,16 @@ enum TaskStatus {
     }
   }
 
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case TaskStatus.pending:
-        return 'Pending';
+        return l10n.statusPending;
       case TaskStatus.inProgress:
-        return 'In Progress';
+        return l10n.statusInProgress;
       case TaskStatus.completed:
-        return 'Completed';
+        return l10n.statusCompleted;
       case TaskStatus.overdue:
-        return 'Overdue';
+        return l10n.statusOverdue;
     }
   }
 

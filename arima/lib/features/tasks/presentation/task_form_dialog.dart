@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../domain/task_item.dart';
 import '../domain/task_status.dart';
@@ -89,6 +90,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.initialTask != null;
 
     return Dialog(
@@ -124,15 +126,15 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isEditing ? 'Edit Task' : 'New Task',
+                              isEditing ? l10n.editTask : l10n.newTask,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
                               isEditing
-                                  ? 'Update task details'
-                                  : 'Create a new task to track',
+                                  ? l10n.updateTaskDetails
+                                  : l10n.createNewTask,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
@@ -151,8 +153,8 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                     controller: _titleController,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: 'Task Title',
-                      hintText: 'What needs to be done?',
+                      labelText: l10n.taskTitle,
+                      hintText: l10n.taskTitleHint,
                       prefixIcon: const Icon(Icons.title_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -160,7 +162,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                     ),
                     validator: (String? value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a title';
+                        return l10n.titleRequired;
                       }
                       return null;
                     },
@@ -171,8 +173,8 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                     maxLines: 3,
                     minLines: 2,
                     decoration: InputDecoration(
-                      labelText: 'Description (optional)',
-                      hintText: 'Add more details...',
+                      labelText: l10n.descriptionOptional,
+                      hintText: l10n.descriptionHint,
                       prefixIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 48),
                         child: Icon(Icons.notes_rounded),
@@ -186,7 +188,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                   DropdownButtonFormField<TaskStatus>(
                     initialValue: _status,
                     decoration: InputDecoration(
-                      labelText: 'Status',
+                      labelText: l10n.status,
                       prefixIcon: const Icon(Icons.flag_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -207,7 +209,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                Text(status.label),
+                                Text(status.label(l10n)),
                               ],
                             ),
                           ),
@@ -235,7 +237,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -249,7 +251,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: Text(isEditing ? 'Update Task' : 'Create Task'),
+                          child: Text(isEditing ? l10n.updateTask : l10n.createTask),
                         ),
                       ),
                     ],
@@ -277,6 +279,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
   }
 
   Widget _buildDeadlinePicker(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -298,7 +301,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
               ),
               const SizedBox(width: 10),
               Text(
-                'Deadline',
+                l10n.deadline,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -328,8 +331,8 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                       const SizedBox(width: 10),
                       Text(
                         _dueAt == null
-                            ? 'No deadline set'
-                            : DateFormatters.shortDateTime(_dueAt),
+                            ? l10n.noDeadlineSet
+                            : DateFormatters.shortDateTime(_dueAt, l10n: l10n),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: _dueAt == null
                               ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
@@ -372,6 +375,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
   }
 
   Widget _buildReminderSection(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(16),
@@ -401,7 +405,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Smart Reminders',
+                  l10n.smartReminders,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -425,8 +429,8 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: 'Remind every',
-                      suffixText: 'hours',
+                      labelText: l10n.remindEvery,
+                      suffixText: l10n.hours,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -436,7 +440,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                       if (!_reminderEnabled) return null;
                       final int? parsed = int.tryParse(value ?? '');
                       if (parsed == null || parsed < 1 || parsed > 72) {
-                        return '1-72 hours';
+                        return l10n.reminderHoursRange;
                       }
                       return null;
                     },
@@ -449,8 +453,8 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: 'Escalate after',
-                      suffixText: 'misses',
+                      labelText: l10n.escalateAfter,
+                      suffixText: l10n.misses,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -460,7 +464,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                       if (!_reminderEnabled) return null;
                       final int? parsed = int.tryParse(value ?? '');
                       if (parsed == null || parsed < 1 || parsed > 20) {
-                        return '1-20';
+                        return l10n.reminderMissesRange;
                       }
                       return null;
                     },
@@ -485,7 +489,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'After max misses, a parent alert will be triggered',
+                      l10n.reminderInfo,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSecondaryContainer,
                       ),

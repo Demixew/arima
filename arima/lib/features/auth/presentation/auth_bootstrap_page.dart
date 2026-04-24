@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/app_localizations.dart';
+
 class AuthBootstrapPage extends StatelessWidget {
   const AuthBootstrapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Container(
@@ -35,13 +38,13 @@ class AuthBootstrapPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Preparing your workspace',
+                        l10n.preparingWorkspace,
                         style: theme.textTheme.titleLarge,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Restoring session and connecting to the backend.',
+                      Text(
+                        l10n.restoringSession,
                         textAlign: TextAlign.center,
                       ),
                     ],

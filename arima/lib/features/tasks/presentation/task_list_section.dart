@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/utils/date_formatters.dart';
 import '../../../core/widgets/app_async_view.dart';
 import '../../../core/widgets/empty_state_view.dart';
@@ -32,10 +33,12 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
           return;
         }
 
+        final l10n = AppLocalizations.of(context)!;
+
         if (next.hasError) {
           final String message =
               ref.read(taskMutationControllerProvider.notifier).errorMessage() ??
-              'Task action failed.';
+              l10n.taskActionFailed;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(message)),
           );
@@ -46,7 +49,7 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
             previous != null && previous.isLoading && !next.isLoading && !next.hasError;
         if (completedAction) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Task list synced successfully.')),
+            SnackBar(content: Text(l10n.taskSyncedSuccess)),
           );
         }
       },
@@ -65,6 +68,7 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
     final AsyncValue<void> mutationState = ref.watch(taskMutationControllerProvider);
     final TaskFilter activeFilter = ref.watch(taskViewControllerProvider);
     final ThemeData theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final String? error = ref.read(taskListControllerProvider.notifier).errorMessage();
     final List<TaskItem> tasks = taskState.valueOrNull ?? <TaskItem>[];
     final List<TaskItem> visibleTasks = tasks
@@ -89,15 +93,15 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('Tasks', style: theme.textTheme.headlineMedium),
+                  Text(l10n.tasksSectionTitle, style: theme.textTheme.headlineMedium),
                   const SizedBox(height: 6),
-                  const Text('Create, update, and sync study tasks with the FastAPI backend.'),
+                  Text(l10n.tasksSectionSubtitle),
                 ],
               ),
             ),
             const SizedBox(width: 16),
             IconButton(
-              tooltip: 'Refresh tasks',
+              tooltip: l10n.refreshTasks,
               onPressed: isMutating ? null : ref.read(taskListControllerProvider.notifier).refresh,
               icon: const Icon(Icons.refresh_rounded),
             ),
@@ -105,7 +109,7 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
             ElevatedButton.icon(
               onPressed: isMutating ? null : () => _openCreateDialog(context),
               icon: const Icon(Icons.add),
-              label: const Text('New task'),
+              label: Text(l10n.newTask),
             ),
           ],
         ),
@@ -115,22 +119,22 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
           runSpacing: 14,
           children: <Widget>[
             _TaskMetricCard(
-              label: 'Total tasks',
+              label: l10n.totalTasks,
               value: tasks.length.toString(),
               icon: Icons.inbox_rounded,
             ),
             _TaskMetricCard(
-              label: 'Active now',
+              label: l10n.activeNow,
               value: activeCount.toString(),
               icon: Icons.play_circle_outline_rounded,
             ),
             _TaskMetricCard(
-              label: 'Completed',
+              label: l10n.completedTasks,
               value: completedCount.toString(),
               icon: Icons.check_circle_outline_rounded,
             ),
             _TaskMetricCard(
-              label: 'Escalations',
+              label: l10n.escalations,
               value: escalatedCount.toString(),
               icon: Icons.notifications_active_outlined,
             ),
@@ -145,7 +149,7 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
                   (TaskFilter filter) => Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: ChoiceChip(
-                      label: Text(filter.label),
+                      label: Text(filter.label(l10n)),
                       selected: filter == activeFilter,
                       onSelected: (_) => ref.read(taskViewControllerProvider.notifier).setFilter(filter),
                     ),
@@ -160,20 +164,20 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
           error: tasks.isEmpty ? error : null,
           child: tasks.isEmpty
               ? EmptyStateView(
-                  title: 'No tasks yet',
-                  message: 'Create your first task to see sync and role-based navigation in action.',
+                  title: l10n.noTasksYet,
+                  message: l10n.addFirstTaskHint,
                   action: ElevatedButton(
                     onPressed: isMutating ? null : () => _openCreateDialog(context),
-                    child: const Text('Create first task'),
+                    child: Text(l10n.createFirstTask),
                   ),
                 )
               : visibleTasks.isEmpty
               ? EmptyStateView(
-                  title: 'No tasks in this view',
-                  message: 'Switch the filter or create a new task to populate this section.',
+                  title: l10n.noTasksInThisView,
+                  message: l10n.switchFilterOrCreate,
                   action: TextButton(
                     onPressed: () => ref.read(taskViewControllerProvider.notifier).setFilter(TaskFilter.all),
-                    child: const Text('Show all tasks'),
+                    child: Text(l10n.showAllTasks),
                   ),
                 )
               : Column(
@@ -234,6 +238,7 @@ class _TaskCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       child: Padding(
@@ -250,7 +255,7 @@ class _TaskCard extends ConsumerWidget {
                     children: <Widget>[
                       Text(task.title, style: theme.textTheme.titleLarge),
                       const SizedBox(height: 6),
-                      Text(task.description ?? 'No description yet.'),
+                      Text(task.description ?? l10n.noDescriptionYet),
                     ],
                   ),
                 ),
@@ -265,16 +270,18 @@ class _TaskCard extends ConsumerWidget {
               children: <Widget>[
                 _InfoPill(
                   icon: Icons.schedule_rounded,
-                  label: DateFormatters.shortDateTime(task.dueAt),
+                  label: DateFormatters.shortDateTime(task.dueAt, l10n: l10n),
                 ),
                 _InfoPill(
                   icon: Icons.sync_rounded,
-                  label: 'Updated ${DateFormatters.shortDateTime(task.updatedAt)}',
+                  label: l10n.updatedAtLabel(
+                    DateFormatters.shortDateTime(task.updatedAt, l10n: l10n),
+                  ),
                 ),
                 if (task.reminder != null)
                   _InfoPill(
                     icon: Icons.notifications_active_outlined,
-                    label: _reminderLabel(task.reminder!),
+                    label: _reminderLabel(task.reminder!, l10n),
                   ),
               ],
             ),
@@ -289,7 +296,8 @@ class _TaskCard extends ConsumerWidget {
                   border: Border.all(color: Colors.red.shade100),
                 ),
                 child: Text(
-                  task.reminder?.parentAlertMessage ?? 'Parent escalation triggered.',
+                  task.reminder?.parentAlertMessage ??
+                      l10n.parentEscalationTriggered,
                   style: TextStyle(
                     color: Colors.red.shade900,
                     fontWeight: FontWeight.w600,
@@ -303,13 +311,13 @@ class _TaskCard extends ConsumerWidget {
                 TextButton.icon(
                   onPressed: isBusy ? null : () => _editTask(context, ref),
                   icon: const Icon(Icons.edit_rounded),
-                  label: const Text('Edit'),
+                  label: Text(l10n.edit),
                 ),
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: isBusy ? null : () => _deleteTask(context, ref),
                   icon: const Icon(Icons.delete_outline_rounded),
-                  label: const Text('Delete'),
+                  label: Text(l10n.deleteTask),
                 ),
               ],
             ),
@@ -345,17 +353,18 @@ class _TaskCard extends ConsumerWidget {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: const Text('Delete task'),
-          content: Text('Delete "${task.title}"? This action cannot be undone.'),
+          title: Text(l10n.deleteTaskTitle),
+          content: Text(l10n.deleteTaskMessage(task.title)),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
+              child: Text(l10n.deleteTask),
             ),
           ],
         );
@@ -369,16 +378,19 @@ class _TaskCard extends ConsumerWidget {
     await ref.read(taskMutationControllerProvider.notifier).deleteTask(task.id);
   }
 
-  String _reminderLabel(TaskReminder reminder) {
+  String _reminderLabel(TaskReminder reminder, AppLocalizations l10n) {
     if (!reminder.isEnabled) {
-      return 'Reminders paused';
+      return l10n.remindersPaused;
     }
 
     if (reminder.escalatedToParent) {
-      return 'Escalated after ${reminder.missedCount} misses';
+      return l10n.reminderEscalated(reminder.missedCount);
     }
 
-    return 'Every ${reminder.remindAfterHours}h, miss ${reminder.maxMissedCount} -> escalate';
+    return l10n.reminderSchedule(
+      reminder.remindAfterHours,
+      reminder.maxMissedCount,
+    );
   }
 }
 
@@ -435,6 +447,7 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final Color background = switch (status) {
       TaskStatus.completed => Colors.green.shade100,
       TaskStatus.inProgress => Colors.blue.shade100,
@@ -456,7 +469,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status.label,
+        status.label(l10n),
         style: TextStyle(color: foreground, fontWeight: FontWeight.w600),
       ),
     );

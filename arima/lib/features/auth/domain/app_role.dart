@@ -1,16 +1,18 @@
+import '../../../core/l10n/app_localizations.dart';
+
 enum AppRole {
   student,
   teacher,
   parent;
 
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case AppRole.student:
-        return 'Student';
+        return l10n.roleStudent;
       case AppRole.teacher:
-        return 'Teacher';
+        return l10n.roleTeacher;
       case AppRole.parent:
-        return 'Parent';
+        return l10n.roleParent;
     }
   }
 }

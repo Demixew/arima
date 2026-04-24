@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../domain/task_status.dart';
 
 enum TaskFilter {
@@ -8,16 +9,16 @@ enum TaskFilter {
   completed,
   overdue;
 
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case TaskFilter.all:
-        return 'All';
+        return l10n.filterAll;
       case TaskFilter.active:
-        return 'Active';
+        return l10n.filterActive;
       case TaskFilter.completed:
-        return 'Completed';
+        return l10n.completed;
       case TaskFilter.overdue:
-        return 'Overdue';
+        return l10n.overdue;
     }
   }
 }

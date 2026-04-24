@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../application/parent_controller.dart';
 import '../domain/linked_child.dart';
 
@@ -17,11 +18,12 @@ class _ParentHomePageState extends ConsumerState<ParentHomePage> {
   @override
   Widget build(BuildContext context) {
     final parentState = ref.watch(parentControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: parentState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text('${l10n.somethingWentWrong}: $error')),
         data: (state) => IndexedStack(
           index: _selectedIndex,
           children: [
@@ -37,21 +39,21 @@ class _ParentHomePageState extends ConsumerState<ParentHomePage> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) => setState(() => _selectedIndex = index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
-            label: 'Children',
+            icon: const Icon(Icons.people_outline),
+            selectedIcon: const Icon(Icons.people),
+            label: l10n.childrenTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.warning_amber_outlined),
-            selectedIcon: Icon(Icons.warning_amber),
-            label: 'Alerts',
+            icon: const Icon(Icons.warning_amber_outlined),
+            selectedIcon: const Icon(Icons.warning_amber),
+            label: l10n.alertsTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Stats',
+            icon: const Icon(Icons.bar_chart_outlined),
+            selectedIcon: const Icon(Icons.bar_chart),
+            label: l10n.statsTab,
           ),
         ],
       ),
@@ -59,7 +61,7 @@ class _ParentHomePageState extends ConsumerState<ParentHomePage> {
           ? FloatingActionButton.extended(
               onPressed: _showLinkChildDialog,
               icon: const Icon(Icons.person_add),
-              label: const Text('Link Child'),
+              label: Text(l10n.linkChild),
             )
           : null,
     );
@@ -70,23 +72,24 @@ class _ParentHomePageState extends ConsumerState<ParentHomePage> {
   }
 
   void _showLinkChildDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Link Child'),
+        title: Text(l10n.linkChild),
         content: TextField(
           controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Child Email',
-            hintText: 'student@example.com',
+          decoration: InputDecoration(
+            labelText: l10n.childEmail,
+            hintText: l10n.childEmailHint,
           ),
           keyboardType: TextInputType.emailAddress,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -96,7 +99,7 @@ class _ParentHomePageState extends ConsumerState<ParentHomePage> {
                 await ref.read(parentControllerProvider.notifier).linkChild(email);
               }
             },
-            child: const Text('Link'),
+            child: Text(l10n.link),
           ),
         ],
       ),
@@ -115,7 +118,7 @@ class _ChildrenTab extends ConsumerWidget {
     final theme = Theme.of(context);
 
     if (state.children.isEmpty) {
-      return _buildEmptyState(theme);
+      return _buildEmptyState(context, theme);
     }
 
     return ListView.builder(
@@ -131,7 +134,8 @@ class _ChildrenTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -139,12 +143,12 @@ class _ChildrenTab extends ConsumerWidget {
           Icon(Icons.people_outline, size: 80, color: theme.colorScheme.primary.withAlpha(100)),
           const SizedBox(height: 16),
           Text(
-            'No children linked yet',
+            l10n.noChildrenLinkedYet,
             style: theme.textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap + to link a child',
+            l10n.tapToLinkChild,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withAlpha(153),
             ),
@@ -164,6 +168,7 @@ class _ChildCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final metrics = child.metrics;
 
     return Card(
@@ -217,7 +222,7 @@ class _ChildCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    child.linkStatus.toUpperCase(),
+                    _localizedStatus(child.linkStatus, l10n).toUpperCase(),
                     style: TextStyle(
                       color: _getStatusColor(child.linkStatus, theme),
                       fontSize: 11,
@@ -236,25 +241,25 @@ class _ChildCard extends ConsumerWidget {
                 children: [
                   _StatItem(
                     icon: Icons.assignment_outlined,
-                    label: 'Tasks',
+                    label: l10n.tasks,
                     value: metrics.totalTasksCreated.toString(),
                     color: theme.colorScheme.primary,
                   ),
                   _StatItem(
                     icon: Icons.check_circle_outline,
-                    label: 'Done',
+                    label: l10n.done,
                     value: metrics.totalTasksCompleted.toString(),
                     color: Colors.green,
                   ),
                   _StatItem(
                     icon: Icons.local_fire_department,
-                    label: 'Streak',
+                    label: l10n.streak,
                     value: metrics.currentStreak.toString(),
                     color: Colors.orange,
                   ),
                   _StatItem(
                     icon: Icons.trending_up,
-                    label: 'Rate',
+                    label: l10n.rate,
                     value: '${metrics.completionRate}%',
                     color: Colors.blue,
                   ),
@@ -271,14 +276,14 @@ class _ChildCard extends ConsumerWidget {
                       onViewStats();
                     },
                     icon: const Icon(Icons.bar_chart, size: 18),
-                    label: const Text('View Stats'),
+                    label: Text(l10n.viewStats),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () => _showUnlinkDialog(context, ref, child),
                   icon: Icon(Icons.link_off, color: theme.colorScheme.error),
-                  tooltip: 'Unlink',
+                  tooltip: l10n.unlink,
                 ),
               ],
             ),
@@ -299,16 +304,28 @@ class _ChildCard extends ConsumerWidget {
     }
   }
 
+  String _localizedStatus(String status, AppLocalizations l10n) {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return l10n.statusActive;
+      case 'inactive':
+        return l10n.statusInactive;
+      default:
+        return status;
+    }
+  }
+
   void _showUnlinkDialog(BuildContext context, WidgetRef ref, LinkedChild child) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Unlink Child'),
-        content: Text('Are you sure you want to unlink ${child.childName}?'),
+        title: Text(l10n.unlinkChild),
+        content: Text('${l10n.confirmUnlink} ${child.childName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -319,7 +336,7 @@ class _ChildCard extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Unlink'),
+            child: Text(l10n.unlink),
           ),
         ],
       ),
@@ -335,6 +352,7 @@ class _AlertsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final escalatedTasks = state.escalatedTasks;
 
     if (escalatedTasks.isEmpty) {
@@ -345,12 +363,12 @@ class _AlertsTab extends StatelessWidget {
             Icon(Icons.check_circle_outline, size: 80, color: Colors.green.withAlpha(100)),
             const SizedBox(height: 16),
             Text(
-              'No alerts',
+              l10n.noAlerts,
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              'Your children are on track!',
+              l10n.childrenOnTrack,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withAlpha(153),
               ),
@@ -379,6 +397,7 @@ class _EscalatedTaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -402,14 +421,16 @@ class _EscalatedTaskCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        task['title'] as String? ?? 'Untitled Task',
+                        task['title'] as String? ?? l10n.untitledTask,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Colors.red.shade900,
                         ),
                       ),
                       Text(
-                        'Child: ${task['child_name'] as String? ?? 'Unknown'}',
+                        l10n.childLabel(
+                          task['child_name'] as String? ?? '-',
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.red.shade700,
                         ),
@@ -433,7 +454,7 @@ class _EscalatedTaskCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       task['reminder']?['parent_alert_message'] as String? ??
-                          'This task requires immediate attention!',
+                          l10n.immediateAttention,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.red.shade800,
                         fontWeight: FontWeight.w500,
@@ -454,7 +475,10 @@ class _EscalatedTaskCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      (task['status'] as String).toUpperCase(),
+                      _localizedStatus(
+                        task['status'] as String,
+                        l10n,
+                      ).toUpperCase(),
                       style: TextStyle(
                         color: Colors.red.shade800,
                         fontSize: 11,
@@ -465,7 +489,7 @@ class _EscalatedTaskCard extends StatelessWidget {
                   const Spacer(),
                   if (task['due_at'] != null)
                     Text(
-                      'Due: ${_formatDate(task['due_at'] as String)}',
+                      l10n.dueLabel(_formatDate(task['due_at'] as String)),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.red.shade700,
                       ),
@@ -483,6 +507,25 @@ class _EscalatedTaskCard extends StatelessWidget {
     final dt = DateTime.parse(isoDate);
     return '${dt.day}/${dt.month}/${dt.year}';
   }
+
+  String _localizedStatus(String status, AppLocalizations l10n) {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return l10n.statusActive;
+      case 'inactive':
+        return l10n.statusInactive;
+      case 'pending':
+        return l10n.statusPending;
+      case 'in_progress':
+        return l10n.statusInProgress;
+      case 'completed':
+        return l10n.statusCompleted;
+      case 'overdue':
+        return l10n.statusOverdue;
+      default:
+        return status;
+    }
+  }
 }
 
 class _StatsTab extends ConsumerWidget {
@@ -493,6 +536,7 @@ class _StatsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (state.selectedChildId == null) {
       return Center(
@@ -502,12 +546,12 @@ class _StatsTab extends ConsumerWidget {
             Icon(Icons.bar_chart_outlined, size: 80, color: theme.colorScheme.primary.withAlpha(100)),
             const SizedBox(height: 16),
             Text(
-              'Select a child',
+              l10n.selectChild,
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              'Go to Children tab and tap "View Stats"',
+              l10n.goToChildrenTab,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withAlpha(153),
               ),
@@ -555,7 +599,7 @@ class _StatsTab extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    'Statistics Overview',
+                    l10n.statisticsOverview,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withAlpha(153),
                     ),
@@ -567,35 +611,35 @@ class _StatsTab extends ConsumerWidget {
           const SizedBox(height: 24),
           _MetricCard(
             icon: Icons.assignment,
-            label: 'Total Tasks',
+            label: l10n.totalTasks,
             value: stats.totalTasks.toString(),
             color: theme.colorScheme.primary,
           ),
           const SizedBox(height: 12),
           _MetricCard(
             icon: Icons.check_circle,
-            label: 'Completed',
+            label: l10n.completed,
             value: stats.completedTasks.toString(),
             color: Colors.green,
           ),
           const SizedBox(height: 12),
           _MetricCard(
             icon: Icons.warning,
-            label: 'Overdue',
+            label: l10n.overdue,
             value: stats.overdueTasks.toString(),
             color: Colors.red,
           ),
           const SizedBox(height: 12),
           _MetricCard(
             icon: Icons.local_fire_department,
-            label: 'Current Streak',
-            value: '${stats.currentStreak} days',
+            label: l10n.currentStreak,
+            value: '${stats.currentStreak} ${l10n.days}',
             color: Colors.orange,
           ),
           const SizedBox(height: 12),
           _MetricCard(
             icon: Icons.trending_up,
-            label: 'Completion Rate',
+            label: l10n.completionRate,
             value: '${stats.completionRate}%',
             color: Colors.blue,
           ),
