@@ -1,0 +1,52 @@
+# ---- AI / Project Info files ----
+*.md
+*.pdf
+TODO*
+PLAN*
+PROJECT*
+QUICK*
+references/
+
+# ---- Backend ----
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.db
+backend/**/*.db
+backend/test_output.txt
+backend/pytest_output*.txt
+
+# ---- Python ----
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# ---- Flutter / Dart ----
+arima/.dart_tool/
+arima/build/
+arima/.pub-cache/
+arima/.flutter-plugins
+arima/.flutter-plugins-dependencies
+arima/pubspec.lock
+arima/**/*.iml
+arima/.idea/
+arima/.vscode/
+
+# ---- IDE / OS ----
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- Logs ----
+*.log
+dart_analyze*.txt
+pytest_output*.txt
+backend_server.log
