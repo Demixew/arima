@@ -89,3 +89,98 @@ def test_user_cannot_access_another_users_task(client: TestClient) -> None:
     assert forbidden_read.status_code == 404
     assert forbidden_update.status_code == 404
     assert forbidden_delete.status_code == 404
+
+
+def test_metrics_endpoint_returns_gamification_summary(
+    client: TestClient,
+    auth_headers: dict[str, str],
+) -> None:
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Level up task", "description": "Earn progress"},
+        headers=auth_headers,
+    )
+    task_id = create_response.json()["id"]
+
+    update_response = client.put(
+        f"/tasks/{task_id}",
+        json={"title": "Level up task", "status": "completed"},
+        headers=auth_headers,
+    )
+    assert update_response.status_code == 200
+
+    metrics_response = client.get("/metrics/me", headers=auth_headers)
+
+    assert metrics_response.status_code == 200
+    body = metrics_response.json()
+    assert body["gamification"]["total_xp"] > 0
+    assert body["gamification"]["level"] >= 1
+    assert body["gamification"]["rank_title"]
+    assert len(body["gamification"]["daily_challenges"]) == 3
+    badge_ids = {badge["id"] for badge in body["gamification"]["unlocked_badges"]}
+    assert "first_task" in badge_ids
+    assert "first_finish" in badge_ids
+    assert body["total_focus_time_minutes"] >= 15
+
+
+def test_study_plan_endpoint_returns_structured_plan(
+    client: TestClient,
+    auth_headers: dict[str, str],
+) -> None:
+    create_response = client.post(
+        "/tasks",
+        json={
+            "title": "Write summary",
+            "description": "Summarize chapter 2",
+            "status": "pending",
+            "due_at": "2026-04-26T18:00:00Z",
+            "difficulty_level": 3,
+            "estimated_time_minutes": 25,
+        },
+        headers=auth_headers,
+    )
+    assert create_response.status_code == 201
+
+    plan_response = client.get("/tasks/study-plan", headers=auth_headers)
+
+    assert plan_response.status_code == 200
+    body = plan_response.json()
+    assert "focus_message" in body
+    assert "do_now" in body
+    assert "do_next" in body
+    assert "estimated_total_minutes" in body
+    assert "weekly_narrative" in body
+
+
+def test_challenge_task_grants_bonus_xp(
+    client: TestClient,
+    auth_headers: dict[str, str],
+) -> None:
+    create_response = client.post(
+        "/tasks",
+        json={
+            "title": "Weekly challenge",
+            "description": "Finish two revision tasks",
+            "is_challenge": True,
+            "challenge_title": "Weekly challenge",
+            "challenge_category": "weekly_goal",
+            "challenge_bonus_xp": 80,
+        },
+        headers=auth_headers,
+    )
+    assert create_response.status_code == 201
+    task_id = create_response.json()["id"]
+
+    update_response = client.put(
+        f"/tasks/{task_id}",
+        json={"title": "Weekly challenge", "status": "completed"},
+        headers=auth_headers,
+    )
+    assert update_response.status_code == 200
+    body = update_response.json()
+    assert body["is_challenge"] is True
+    assert body["challenge_bonus_xp"] == 80
+
+    metrics_response = client.get("/metrics/me", headers=auth_headers)
+    assert metrics_response.status_code == 200
+    assert metrics_response.json()["gamification"]["total_xp"] >= 215

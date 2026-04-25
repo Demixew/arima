@@ -103,6 +103,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get taskSubmittedSuccess => 'Task submitted successfully!';
   @override
+  String get submittingTask => 'Submitting your answer...';
+  @override
+  String get aiReviewRunningStudent => 'AI is checking your answer now.';
+  @override
+  String get aiReviewReadyStudent => 'AI review is ready.';
+  @override
+  String get aiReviewFailedStudent =>
+      'Your answer was saved, but AI review could not finish.';
+  @override
+  String get submissionSavedWaitingForTeacher =>
+      'Your answer was saved and is waiting for teacher review.';
+  @override
   String get graded => 'Graded';
   @override
   String get submitted => 'Submitted';
@@ -158,6 +170,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remaining => 'Remaining';
   @override
   String get taskOverview => 'Task Overview';
+  @override
+  String get gamificationTitle => 'Progress Journey';
+  @override
+  String get levelLabel => 'Level';
+  @override
+  String get xpLabel => 'XP';
+  @override
+  String get energyLabel => 'Energy';
+  @override
+  String get badgesTitle => 'Badges';
+  @override
+  String get dailyChallengesTitle => 'Daily Missions';
+  @override
+  String get nextRewardLabel => 'Next Reward';
+  @override
+  String get noBadgesYet => 'No badges yet. Complete tasks to unlock your first one.';
+  @override
+  String levelUpMessage(int level) => 'Level up! You reached level $level.';
+  @override
+  String badgeUnlockedMessage(String badgeTitle) =>
+      'Badge unlocked: $badgeTitle';
+  @override
+  String get streakShieldTitle => 'Protect Your Streak';
+  @override
+  String streakShieldBody(int streak) =>
+      'Complete one task today to keep your $streak-day streak alive.';
+  @override
+  String get levelUpDialogAction => 'Keep Going';
   @override
   String get total => 'Total';
   @override
@@ -333,6 +373,240 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiPromptRequired => 'Enter a short task request for AI';
   @override
   String aiModelLabel(String model) => 'Model: $model';
+  @override
+  String get reviewModeLabel => 'Review mode';
+  @override
+  String get reviewModeTeacherOnly => 'Teacher only';
+  @override
+  String get reviewModeTeacherAndAi => 'AI + teacher';
+  @override
+  String get reviewModeAiOnly => 'AI only';
+  @override
+  String get evaluationCriteriaLabel => 'Evaluation criteria';
+  @override
+  String get evaluationCriteriaHint =>
+      'Example: accuracy, explanation quality, structure.';
+  @override
+  String get aiSuggestionTitle => 'AI suggestion';
+  @override
+  String get aiSuggestedGrade => 'AI grade';
+  @override
+  String get aiSuggestedFeedback => 'AI feedback';
+  @override
+  String get finalTeacherDecision => 'Teacher final decision';
+  @override
+  String get runAiReview => 'Run AI review';
+  @override
+  String get aiReviewCompleted => 'AI review is ready';
+  @override
+  String get aiReviewNeeded => 'AI review has not been generated yet';
+  @override
+  String get reviewSummary => 'Review summary';
+  @override
+  String get noSubmissionText => 'No submission text provided.';
+  @override
+  String aiCheckedAtLabel(String value) => 'Checked by AI: $value';
+  @override
+  String get aiReviewCheckingLabel => 'AI checking';
+  @override
+  String get aiReviewFailedLabel => 'AI failed';
+  @override
+  String get aiReviewRunningTeacher =>
+      'AI review is running. Manual grading is still available.';
+  @override
+  String aiReviewFailedTeacher(String detail) => 'AI review failed: $detail';
+  @override
+  String get aiReviewFailedTeacherFallback =>
+      'AI review failed. You can still grade this manually.';
+  @override
+  String get reviewTimelineSubmitted => 'Submitted';
+  @override
+  String get reviewTimelineAiChecked => 'AI checked';
+  @override
+  String get reviewTimelineTeacherGraded => 'Teacher graded';
+  @override
+  String get difficultyLabel => 'Difficulty';
+  @override
+  String get difficultyHint =>
+      'Low is gentle practice, high is a bigger challenge.';
+  @override
+  String difficultyValue(int value) => 'Level $value';
+  @override
+  String get estimatedTimeLabel => 'Estimated time';
+  @override
+  String get estimatedTimeHint => 'How long should this take?';
+  @override
+  String estimatedTimeMinutes(int minutes) => '$minutes min';
+  @override
+  String get estimatedTimeRange => 'Enter a time from 1 to 480 minutes';
+  @override
+  String get minutes => 'min';
+  @override
+  String get antiFatigueLabel => 'Break-friendly mode';
+  @override
+  String get antiFatigueHint => 'Show a calmer, chunked workflow for longer tasks.';
+  @override
+  String get antiFatigueBannerTitle => 'Anti-fatigue plan';
+  @override
+  String get antiFatigueBannerText =>
+      'Try short work sprints with a quick break so the task feels easier to finish.';
+  @override
+  String get aiHelperTitle => 'AI helper';
+  @override
+  String get aiHelperSubtitle =>
+      'Let AI suggest a calmer title, timing, and difficulty before you assign the task.';
+  @override
+  String get atRiskRadarTitle => 'At-risk radar';
+  @override
+  String get atRiskRadarSubtitle => 'See who needs intervention first and why.';
+  @override
+  String get riskNeedsAttention => 'Needs attention';
+  @override
+  String get riskWatch => 'Watch';
+  @override
+  String get riskStable => 'Stable';
+  @override
+  String riskReasonLabel(String reason) => 'Risk reason: $reason';
+  @override
+  String get viewTasks => 'View tasks';
+  @override
+  String get viewSubmissions => 'View submissions';
+  @override
+  String studentTasksTitle(String name) => '$name tasks';
+  @override
+  String get noStudentTasksYet => 'No tasks assigned yet.';
+  @override
+  String get extendDeadline => 'Extend deadline';
+  @override
+  String get deadlineUpdated => 'Deadline updated';
+  @override
+  String get weeklyChallengeTitle => 'Weekly challenge';
+  @override
+  String get weeklyChallengeSubtitle =>
+      'Make this assignment feel like a special quest with bonus XP.';
+  @override
+  String get challengeTitleLabel => 'Challenge title';
+  @override
+  String get challengeCategoryLabel => 'Challenge category';
+  @override
+  String get bonusXpLabel => 'Bonus XP';
+  @override
+  String get challengeCategoryWeeklyGoal => 'Weekly goal';
+  @override
+  String get challengeCategoryPunctuality => 'Punctuality';
+  @override
+  String get challengeCategoryWritingQuality => 'Writing quality';
+  @override
+  String get challengeCategoryFocusTime => 'Focus time';
+  @override
+  String get challengeCategoryStreak => 'Streak';
+  @override
+  String get aiStudyPlanTitle => 'AI study plan';
+  @override
+  String get doNowLabel => 'Do now';
+  @override
+  String get doNextLabel => 'Do next';
+  @override
+  String stretchGoalLabel(String value) => 'Stretch goal: $value';
+  @override
+  String mainSkillToImproveLabel(String value) =>
+      'Main skill to improve: $value';
+  @override
+  String get openFocusTask => 'Open focus task';
+  @override
+  String get markFirstDone => 'Mark first done';
+  @override
+  String get deadlineRescuePlanTitle => 'Deadline rescue plan';
+  @override
+  String rescueApproachLabel(String value) => 'Approach: $value';
+  @override
+  String rescueRecommendedBlockLabel(String value) =>
+      'Recommended block: $value';
+  @override
+  String get parentActionFeedTitle => 'Parent action feed';
+  @override
+  String tonightLabel(String value) => 'Tonight: $value';
+  @override
+  String recommendedActionTonightLabel(String value) =>
+      'Recommended action tonight: $value';
+  @override
+  String get showDetails => 'Show details';
+  @override
+  String get hideDetails => 'Hide details';
+  @override
+  String get assignSuggestedTask => 'Assign suggested task';
+  @override
+  String get suggestedFollowupAssigned => 'Suggested follow-up task assigned';
+  @override
+  String get reviewSignalsTitle => 'Review signals';
+  @override
+  String get strengthsTitle => 'Strengths';
+  @override
+  String get nextStepsTitle => 'Next steps';
+  @override
+  String get aiRubricTitle => 'AI rubric';
+  @override
+  String get suggestedNextTaskTitle => 'Suggested next task';
+  @override
+  String difficultyLevelLabel(int value) => 'Level $value';
+  @override
+  String shortMinutesLabel(int value) => '$value min';
+  @override
+  String aiScoreCompactLabel(int value) => 'AI $value/100';
+  @override
+  String confidenceCompactLabel(int value) => '$value% confident';
+  @override
+  String aiScoreDetailedLabel(int value) => 'AI score: $value/100';
+  @override
+  String confidenceDetailedLabel(int value) => 'Confidence: $value%';
+  @override
+  String sourceLabel(String value) => 'Source: $value';
+  @override
+  String get rubricTemplatesTitle => 'Rubric templates';
+  @override
+  String get presetEssay => 'Essay';
+  @override
+  String get presetShortAnswer => 'Short answer';
+  @override
+  String get presetMathExplanation => 'Math explanation';
+  @override
+  String get presetScienceReport => 'Science report';
+  @override
+  String get presetReadingResponse => 'Reading response';
+  @override
+  String get presetProjectReflection => 'Project reflection';
+  @override
+  String highestPriorityLabel(String name, String reason) =>
+      'Highest priority: $name • $reason';
+  @override
+  String challengeXpLabel(String title, int xp) => '$title +$xp XP';
+  @override
+  String positiveSignalLabel(String value) => 'Positive: $value';
+  @override
+  String get aiStatusLoading => 'AI status is loading...';
+  @override
+  String get aiStatusUnavailable => 'AI status is unavailable';
+  @override
+  String aiReadyStatus(String providerLabel) => '$providerLabel AI is ready';
+  @override
+  String aiUnavailableStatus(String providerLabel) =>
+      '$providerLabel AI is unavailable';
+  @override
+  String get aiModeExternal => 'External provider';
+  @override
+  String get aiModeBuiltin => 'Built-in mode';
+  @override
+  String get aiModeUnavailable => 'Unavailable';
+  @override
+  String modeLabel(String value) => 'Mode: $value';
+  @override
+  String providerValueLabel(String value) => 'Provider: $value';
+  @override
+  String modelValueLabel(String value) => 'Model: $value';
+  @override
+  String endpointValueLabel(String value) => 'Endpoint: $value';
+  @override
+  String get unknownValue => 'unknown';
 
   @override
   String get linkChild => 'Link Child';

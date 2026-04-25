@@ -222,6 +222,9 @@ class _TaskListSectionState extends ConsumerState<TaskListSection> {
           reminderEnabled: result.reminderEnabled,
           remindAfterHours: result.remindAfterHours,
           maxMissedCount: result.maxMissedCount,
+          difficultyLevel: result.difficultyLevel,
+          estimatedTimeMinutes: result.estimatedTimeMinutes,
+          antiFatigueEnabled: result.antiFatigueEnabled,
         );
   }
 }
@@ -267,16 +270,30 @@ class _TaskCard extends ConsumerWidget {
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: <Widget>[
+            children: <Widget>[
+              _InfoPill(
+                icon: Icons.schedule_rounded,
+                label: DateFormatters.shortDateTime(task.dueAt, l10n: l10n),
+              ),
+              _InfoPill(
+                icon: Icons.bolt_rounded,
+                label: l10n.difficultyValue(task.difficultyLevel),
+              ),
+              if (task.estimatedTimeMinutes != null)
                 _InfoPill(
-                  icon: Icons.schedule_rounded,
-                  label: DateFormatters.shortDateTime(task.dueAt, l10n: l10n),
+                  icon: Icons.timer_outlined,
+                  label: l10n.estimatedTimeMinutes(task.estimatedTimeMinutes!),
                 ),
+              if (task.antiFatigueEnabled)
                 _InfoPill(
-                  icon: Icons.sync_rounded,
-                  label: l10n.updatedAtLabel(
-                    DateFormatters.shortDateTime(task.updatedAt, l10n: l10n),
-                  ),
+                  icon: Icons.self_improvement_rounded,
+                  label: l10n.antiFatigueLabel,
+                ),
+              _InfoPill(
+                icon: Icons.sync_rounded,
+                label: l10n.updatedAtLabel(
+                  DateFormatters.shortDateTime(task.updatedAt, l10n: l10n),
+                ),
                 ),
                 if (task.reminder != null)
                   _InfoPill(
@@ -346,6 +363,9 @@ class _TaskCard extends ConsumerWidget {
           reminderEnabled: result.reminderEnabled,
           remindAfterHours: result.remindAfterHours,
           maxMissedCount: result.maxMissedCount,
+          difficultyLevel: result.difficultyLevel,
+          estimatedTimeMinutes: result.estimatedTimeMinutes,
+          antiFatigueEnabled: result.antiFatigueEnabled,
         );
   }
 

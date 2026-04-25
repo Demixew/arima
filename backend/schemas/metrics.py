@@ -6,6 +6,40 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from backend.schemas.insights import WeeklyNarrativeResponse
+
+
+class BadgeResponse(BaseModel):
+    id: str
+    title: str
+    description: str
+    icon: str
+    accent_color: str
+
+
+class DailyChallengeResponse(BaseModel):
+    id: str
+    title: str
+    description: str
+    current: int
+    target: int
+    reward_xp: int
+    completed: bool
+
+
+class GamificationProfileResponse(BaseModel):
+    total_xp: int
+    level: int
+    rank_title: str
+    current_level_xp: int
+    next_level_xp: int
+    progress_percent: int
+    energy: int
+    next_unlock_hint: str | None = None
+    unlocked_badges: list[BadgeResponse] = []
+    daily_challenges: list[DailyChallengeResponse] = []
+
+
 class UserMetricsResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
@@ -23,6 +57,7 @@ class UserMetricsResponse(BaseModel):
     last_activity_at: datetime | None
     created_at: datetime
     updated_at: datetime
+    gamification: GamificationProfileResponse | None = None
 
 class DailyStatsResponse(BaseModel):
 
@@ -59,6 +94,12 @@ class LinkedChildResponse(BaseModel):
     link_status: str
     metrics: UserMetricsResponse | None = None
     recent_tasks: list[dict[str, Any]] = []
+    positive_signal: str | None = None
+    attention_signal: str | None = None
+    recommended_action: str | None = None
+    support_summary: str | None = None
+    needs_attention: bool = False
+    weekly_narrative: WeeklyNarrativeResponse | None = None
 
 class ChildStatsSummary(BaseModel):
 
@@ -68,6 +109,12 @@ class ChildStatsSummary(BaseModel):
     current_streak: int = 0
     completion_rate: int = 0
     last_activity: datetime | None = None
+    gamification: GamificationProfileResponse | None = None
+    positive_signal: str | None = None
+    attention_signal: str | None = None
+    recommended_action: str | None = None
+    support_summary: str | None = None
+    weekly_narrative: WeeklyNarrativeResponse | None = None
 
 class LinkChildRequest(BaseModel):
 

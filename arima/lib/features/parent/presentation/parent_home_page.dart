@@ -215,6 +215,25 @@ class _ChildCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                if (child.needsAttention) ...[
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange.shade200),
+                    ),
+                    child: Text(
+                      l10n.riskNeedsAttention,
+                      style: TextStyle(
+                        color: Colors.orange.shade800,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -234,6 +253,55 @@ class _ChildCard extends ConsumerWidget {
             ),
             if (metrics != null) ...[
               const SizedBox(height: 16),
+              if (metrics.gamification != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        theme.colorScheme.primary.withAlpha(220),
+                        theme.colorScheme.secondary.withAlpha(220),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.auto_awesome, color: Colors.white),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${l10n.levelLabel} ${metrics.gamification!.level}',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              metrics.gamification!.rankTitle,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withAlpha(220),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '${metrics.gamification!.totalXp} ${l10n.xpLabel}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               const Divider(height: 1),
               const SizedBox(height: 12),
               Row(
@@ -264,6 +332,43 @@ class _ChildCard extends ConsumerWidget {
                     color: Colors.blue,
                   ),
                 ],
+              ),
+            ],
+            if (child.supportSummary?.isNotEmpty ?? false) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer.withAlpha(90),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.parentActionFeedTitle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      child.supportSummary!,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    if (child.recommendedAction?.isNotEmpty ?? false) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.tonightLabel(child.recommendedAction!),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
             const SizedBox(height: 12),
@@ -576,6 +681,142 @@ class _StatsTab extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (stats.supportSummary?.isNotEmpty ?? false) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondaryContainer.withAlpha(90),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.parentActionFeedTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (stats.positiveSignal?.isNotEmpty ?? false)
+                    Text(l10n.positiveSignalLabel(stats.positiveSignal!)),
+                  if (stats.attentionSignal?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      '${l10n.riskNeedsAttention}: ${stats.attentionSignal!}',
+                      style: TextStyle(color: Colors.orange.shade800),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Text(
+                    stats.supportSummary!,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  if (stats.recommendedAction?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      l10n.recommendedActionTonightLabel(
+                        stats.recommendedAction!,
+                      ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (stats.weeklyNarrative != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withAlpha(90),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stats.weeklyNarrative!.headline,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(stats.weeklyNarrative!.summary),
+                  if (stats.weeklyNarrative!.nextFocus?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      stats.weeklyNarrative!.nextFocus!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (stats.gamification != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.secondary,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${l10n.levelLabel} ${stats.gamification!.level}',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    stats.gamification!.rankTitle,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.white.withAlpha(220),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: stats.gamification!.progressPercent / 100,
+                      minHeight: 10,
+                      backgroundColor: Colors.white.withAlpha(70),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${stats.gamification!.currentLevelXp}/${stats.gamification!.nextLevelXp} ${l10n.xpLabel}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withAlpha(220),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Row(
             children: [
               CircleAvatar(

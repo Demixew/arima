@@ -12,9 +12,16 @@ from sqlalchemy.orm import selectinload
 from backend.api.auth import get_current_user
 from backend.core.db import get_db_session
 from backend.models.task import Task, TaskStatus
+from backend.models.user import UserRole
 from backend.models.user import User
-from backend.schemas.task import TaskCreateRequest, TaskResponse, TaskUpdateRequest
+from backend.schemas.task import (
+    StudyPlanResponse,
+    TaskCreateRequest,
+    TaskResponse,
+    TaskUpdateRequest,
+)
 from backend.services import metrics_service
+from backend.services import insights_service
 from backend.services.reminder_service import sync_reminder_with_task, upsert_task_reminder
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -43,7 +50,9 @@ async def _serialize_owned_task(
     session: AsyncSession,
 ) -> TaskResponse:
     task = await _get_owned_task(task_id=task_id, current_user=current_user, session=session)
-    return TaskResponse.model_validate(task)
+    payload = TaskResponse.model_validate(task).model_dump()
+    payload["rescue_plan"] = insights_service.build_rescue_plan(task)
+    return TaskResponse(**payload)
 
 @router.get(
     "",
@@ -61,7 +70,42 @@ async def list_tasks(
         .order_by(Task.created_at.desc())
     )
     tasks = (await session.execute(statement)).scalars().all()
-    return [TaskResponse.model_validate(task) for task in tasks]
+    responses: list[TaskResponse] = []
+    for task in tasks:
+        payload = TaskResponse.model_validate(task).model_dump()
+        payload["rescue_plan"] = insights_service.build_rescue_plan(task)
+        responses.append(TaskResponse(**payload))
+    return responses
+
+
+@router.get(
+    "/study-plan",
+    response_model=StudyPlanResponse,
+    status_code=HTTPStatus.OK,
+)
+async def get_study_plan(
+    session: AsyncSession = Depends(get_db_session),
+    current_user: User = Depends(get_current_user),
+) -> StudyPlanResponse:
+    if current_user.role != UserRole.student:
+        raise HTTPException(status_code=403, detail="Only students can view study plans")
+
+    statement: Select[tuple[Task]] = (
+        select(Task)
+        .options(selectinload(Task.reminder), selectinload(Task.submission))
+        .where(Task.owner_id == current_user.id)
+        .order_by(Task.created_at.desc())
+    )
+    tasks = list((await session.execute(statement)).scalars().all())
+    metrics = await metrics_service.get_user_metrics(session, current_user.id)
+    payload = insights_service.build_study_plan(tasks=tasks, metrics=metrics)
+    payload["weekly_narrative"] = insights_service.build_weekly_narrative(
+        role="student",
+        person_name=current_user.full_name,
+        tasks=tasks,
+        metrics=metrics,
+    )
+    return StudyPlanResponse(**payload)
 
 @router.post(
     "",
@@ -81,6 +125,15 @@ async def create_task(
         owner_id=current_user.id,
         assigned_by_teacher_id=payload.assigned_to_student_id,
         requires_submission=payload.requires_submission,
+        difficulty_level=payload.difficulty_level,
+        estimated_time_minutes=payload.estimated_time_minutes,
+        anti_fatigue_enabled=payload.anti_fatigue_enabled,
+        is_challenge=payload.is_challenge,
+        challenge_title=payload.challenge_title,
+        challenge_category=payload.challenge_category,
+        challenge_bonus_xp=payload.challenge_bonus_xp,
+        review_mode=payload.review_mode,
+        evaluation_criteria=payload.evaluation_criteria,
     )
     session.add(task)
     await session.flush()
@@ -142,7 +195,11 @@ async def update_task(
 
     if not was_completed and task.status == TaskStatus.completed:
         await metrics_service.update_on_task_completed(
-            session, current_user.id, datetime.now(timezone.utc)
+            session,
+            current_user.id,
+            datetime.now(timezone.utc),
+            focus_time_minutes=task.estimated_time_minutes or 15,
+            bonus_xp=task.challenge_bonus_xp if task.is_challenge else 0,
         )
 
     await session.commit()

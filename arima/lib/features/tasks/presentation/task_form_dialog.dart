@@ -15,6 +15,9 @@ class TaskFormResult {
     required this.reminderEnabled,
     required this.remindAfterHours,
     required this.maxMissedCount,
+    required this.difficultyLevel,
+    required this.estimatedTimeMinutes,
+    required this.antiFatigueEnabled,
   });
 
   final String title;
@@ -24,6 +27,9 @@ class TaskFormResult {
   final bool reminderEnabled;
   final int remindAfterHours;
   final int maxMissedCount;
+  final int difficultyLevel;
+  final int? estimatedTimeMinutes;
+  final bool antiFatigueEnabled;
 }
 
 class TaskFormDialog extends StatefulWidget {
@@ -44,9 +50,12 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
   late final TextEditingController _descriptionController;
   late final TextEditingController _remindAfterHoursController;
   late final TextEditingController _maxMissedCountController;
+  late final TextEditingController _estimatedTimeController;
   late TaskStatus _status;
   DateTime? _dueAt;
   bool _reminderEnabled = true;
+  int _difficultyLevel = 2;
+  bool _antiFatigueEnabled = false;
 
   late final AnimationController _animationController;
   late final Animation<double> _fadeAnimation;
@@ -62,9 +71,14 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
     _maxMissedCountController = TextEditingController(
       text: (widget.initialTask?.reminder?.maxMissedCount ?? 3).toString(),
     );
+    _estimatedTimeController = TextEditingController(
+      text: (widget.initialTask?.estimatedTimeMinutes ?? '').toString(),
+    );
     _status = widget.initialTask?.status ?? TaskStatus.pending;
     _dueAt = widget.initialTask?.dueAt;
     _reminderEnabled = widget.initialTask?.reminder?.isEnabled ?? true;
+    _difficultyLevel = widget.initialTask?.difficultyLevel ?? 2;
+    _antiFatigueEnabled = widget.initialTask?.antiFatigueEnabled ?? false;
 
     _animationController = AnimationController(
       vsync: this,
@@ -83,6 +97,7 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
     _descriptionController.dispose();
     _remindAfterHoursController.dispose();
     _maxMissedCountController.dispose();
+    _estimatedTimeController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -221,6 +236,12 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
                       }
                     },
                   ),
+                  const SizedBox(height: 16),
+                  _buildDifficultySection(theme),
+                  const SizedBox(height: 16),
+                  _buildTimingSection(theme),
+                  const SizedBox(height: 16),
+                  _buildFatigueSection(theme),
                   const SizedBox(height: 16),
                   _buildDeadlinePicker(theme),
                   const SizedBox(height: 20),
@@ -504,6 +525,126 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
     );
   }
 
+  Widget _buildDifficultySection(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.rocket_launch_rounded, size: 20, color: theme.colorScheme.primary),
+              const SizedBox(width: 10),
+              Text(
+                l10n.difficultyLabel,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              Text(
+                l10n.difficultyValue(_difficultyLevel),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: _difficultyLevel.toDouble(),
+            min: 1,
+            max: 5,
+            divisions: 4,
+            label: _difficultyLevel.toString(),
+            onChanged: (value) {
+              setState(() => _difficultyLevel = value.round());
+            },
+          ),
+          Text(
+            l10n.difficultyHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimingSection(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.timer_outlined, size: 20, color: theme.colorScheme.primary),
+              const SizedBox(width: 10),
+              Text(
+                l10n.estimatedTimeLabel,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _estimatedTimeController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              labelText: l10n.estimatedTimeHint,
+              suffixText: l10n.minutes,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            validator: (value) {
+              final text = value?.trim() ?? '';
+              if (text.isEmpty) {
+                return null;
+              }
+              final parsed = int.tryParse(text);
+              if (parsed == null || parsed < 1 || parsed > 480) {
+                return l10n.estimatedTimeRange;
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFatigueSection(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    return SwitchListTile(
+      value: _antiFatigueEnabled,
+      onChanged: (value) => setState(() => _antiFatigueEnabled = value),
+      title: Text(l10n.antiFatigueLabel),
+      subtitle: Text(l10n.antiFatigueHint),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      tileColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+    );
+  }
+
   Future<void> _pickDueDate() async {
     final DateTime now = DateTime.now();
     final DateTime firstDate = DateTime(now.year - 1);
@@ -551,6 +692,9 @@ class _TaskFormDialogState extends State<TaskFormDialog> with SingleTickerProvid
         reminderEnabled: _reminderEnabled,
         remindAfterHours: int.tryParse(_remindAfterHoursController.text.trim()) ?? 6,
         maxMissedCount: int.tryParse(_maxMissedCountController.text.trim()) ?? 3,
+        difficultyLevel: _difficultyLevel,
+        estimatedTimeMinutes: int.tryParse(_estimatedTimeController.text.trim()),
+        antiFatigueEnabled: _antiFatigueEnabled,
       ),
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/domain/weekly_narrative.dart';
+import '../../metrics/domain/gamification_profile.dart';
+
 @immutable
 class ChildStats {
   const ChildStats({
@@ -9,6 +12,12 @@ class ChildStats {
     required this.currentStreak,
     required this.completionRate,
     this.lastActivity,
+    this.gamification,
+    this.positiveSignal,
+    this.attentionSignal,
+    this.recommendedAction,
+    this.supportSummary,
+    this.weeklyNarrative,
   });
 
   final int totalTasks;
@@ -17,6 +26,12 @@ class ChildStats {
   final int currentStreak;
   final int completionRate;
   final DateTime? lastActivity;
+  final GamificationProfile? gamification;
+  final String? positiveSignal;
+  final String? attentionSignal;
+  final String? recommendedAction;
+  final String? supportSummary;
+  final WeeklyNarrative? weeklyNarrative;
 
   factory ChildStats.fromJson(Map<String, dynamic> json) {
     return ChildStats(
@@ -28,6 +43,20 @@ class ChildStats {
       lastActivity: json['last_activity'] == null
           ? null
           : DateTime.parse(json['last_activity'] as String),
+      gamification: json['gamification'] == null
+          ? null
+          : GamificationProfile.fromJson(
+              Map<String, dynamic>.from(json['gamification'] as Map),
+            ),
+      positiveSignal: json['positive_signal'] as String?,
+      attentionSignal: json['attention_signal'] as String?,
+      recommendedAction: json['recommended_action'] as String?,
+      supportSummary: json['support_summary'] as String?,
+      weeklyNarrative: json['weekly_narrative'] == null
+          ? null
+          : WeeklyNarrative.fromJson(
+              Map<String, dynamic>.from(json['weekly_narrative'] as Map),
+            ),
     );
   }
 }

@@ -161,6 +161,34 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get taskOverview => 'Обзор заданий';
   @override
+  String get gamificationTitle => 'Путь прогресса';
+  @override
+  String get levelLabel => 'Уровень';
+  @override
+  String get xpLabel => 'XP';
+  @override
+  String get energyLabel => 'Энергия';
+  @override
+  String get badgesTitle => 'Награды';
+  @override
+  String get dailyChallengesTitle => 'Задания дня';
+  @override
+  String get nextRewardLabel => 'Следующая награда';
+  @override
+  String get noBadgesYet => 'Пока нет наград. Выполните задания, чтобы открыть первую.';
+  @override
+  String levelUpMessage(int level) => 'Новый уровень! Вы достигли уровня $level.';
+  @override
+  String badgeUnlockedMessage(String badgeTitle) =>
+      'Новая награда: $badgeTitle';
+  @override
+  String get streakShieldTitle => 'Защитите серию';
+  @override
+  String streakShieldBody(int streak) =>
+      'Выполните хотя бы одно задание сегодня, чтобы сохранить серию в $streak дн.';
+  @override
+  String get levelUpDialogAction => 'Продолжить';
+  @override
   String get total => 'Всего';
   @override
   String get inProgress => 'В процессе';
@@ -335,6 +363,71 @@ class AppLocalizationsRu extends AppLocalizations {
   String get aiPromptRequired => 'Введите короткий запрос для ИИ';
   @override
   String aiModelLabel(String model) => 'Модель: $model';
+  @override
+  String get reviewModeLabel => 'Режим проверки';
+  @override
+  String get reviewModeTeacherOnly => 'Только учитель';
+  @override
+  String get reviewModeTeacherAndAi => 'ИИ и учитель';
+  @override
+  String get reviewModeAiOnly => 'Только ИИ';
+  @override
+  String get evaluationCriteriaLabel => 'Критерии оценки';
+  @override
+  String get evaluationCriteriaHint =>
+      'Например: точность, логика решения, аккуратность ответа.';
+  @override
+  String get aiSuggestionTitle => 'Подсказка ИИ';
+  @override
+  String get aiSuggestedGrade => 'Оценка ИИ';
+  @override
+  String get aiSuggestedFeedback => 'Комментарий ИИ';
+  @override
+  String get finalTeacherDecision => 'Итоговое решение учителя';
+  @override
+  String get runAiReview => 'Запустить проверку ИИ';
+  @override
+  String get aiReviewCompleted => 'Проверка ИИ готова';
+  @override
+  String get aiReviewNeeded => 'Проверка ИИ еще не выполнена';
+  @override
+  String get reviewSummary => 'Сводка проверки';
+  @override
+  String get noSubmissionText => 'Текст ответа не добавлен.';
+  @override
+  String aiCheckedAtLabel(String value) => 'Проверено ИИ: $value';
+  @override
+  String get difficultyLabel => 'Сложность';
+  @override
+  String get difficultyHint =>
+      'Низкий уровень — мягкая практика, высокий — более серьезный вызов.';
+  @override
+  String difficultyValue(int value) => 'Уровень $value';
+  @override
+  String get estimatedTimeLabel => 'Оценка времени';
+  @override
+  String get estimatedTimeHint => 'Сколько времени займет задание?';
+  @override
+  String estimatedTimeMinutes(int minutes) => '$minutes мин';
+  @override
+  String get estimatedTimeRange => 'Введите время от 1 до 480 минут';
+  @override
+  String get minutes => 'мин';
+  @override
+  String get antiFatigueLabel => 'Режим без усталости';
+  @override
+  String get antiFatigueHint =>
+      'Показывает более спокойный, разбитый на части сценарий для длинных задач.';
+  @override
+  String get antiFatigueBannerTitle => 'План без усталости';
+  @override
+  String get antiFatigueBannerText =>
+      'Лучше работать короткими отрезками с перерывом, чтобы задание не утомляло.';
+  @override
+  String get aiHelperTitle => 'ИИ-помощник';
+  @override
+  String get aiHelperSubtitle =>
+      'Пусть ИИ предложит более мягкие сроки, сложность и формулировку задания.';
 
   @override
   String get linkChild => 'Привязать ребенка';
@@ -483,4 +576,171 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get restoringSession =>
       'Восстанавливаем сессию и подключаемся к серверу.';
+  @override
+  String get aiReviewCheckingLabel => '\u0418\u0418 \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442';
+  @override
+  String get aiReviewFailedLabel => '\u0418\u0418 \u043d\u0435 \u0441\u043f\u0440\u0430\u0432\u0438\u043b\u0441\u044f';
+  @override
+  String get aiReviewRunningTeacher =>
+      '\u0418\u0418 \u0441\u0435\u0439\u0447\u0430\u0441 \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442 \u0440\u0430\u0431\u043e\u0442\u0443. \u0420\u0443\u0447\u043d\u0430\u044f \u043e\u0446\u0435\u043d\u043a\u0430 \u0432\u0441\u0435 \u0435\u0449\u0435 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430.';
+  @override
+  String aiReviewFailedTeacher(String detail) =>
+      '\u0418\u0418 \u043d\u0435 \u0441\u043c\u043e\u0433 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443: $detail';
+  @override
+  String get aiReviewFailedTeacherFallback =>
+      '\u0418\u0418 \u043d\u0435 \u0441\u043c\u043e\u0433 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044c \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443. \u0412\u044b \u0432\u0441\u0435 \u0435\u0449\u0435 \u043c\u043e\u0436\u0435\u0442\u0435 \u043e\u0446\u0435\u043d\u0438\u0442\u044c \u0440\u0430\u0431\u043e\u0442\u0443 \u0432\u0440\u0443\u0447\u043d\u0443\u044e.';
+  @override
+  String get reviewTimelineSubmitted => '\u041e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e';
+  @override
+  String get reviewTimelineAiChecked => '\u0418\u0418 \u043f\u0440\u043e\u0432\u0435\u0440\u0438\u043b';
+  @override
+  String get reviewTimelineTeacherGraded => '\u0423\u0447\u0438\u0442\u0435\u043b\u044c \u043e\u0446\u0435\u043d\u0438\u043b';
+  @override
+  String get atRiskRadarTitle => '\u0420\u0430\u0434\u0430\u0440 \u0440\u0438\u0441\u043a\u0430';
+  @override
+  String get atRiskRadarSubtitle => '\u0421\u0440\u0430\u0437\u0443 \u0432\u0438\u0434\u043d\u043e, \u043a\u043e\u043c\u0443 \u043d\u0443\u0436\u043d\u0430 \u043f\u043e\u043c\u043e\u0449\u044c \u0438 \u043f\u043e\u0447\u0435\u043c\u0443.';
+  @override
+  String get riskNeedsAttention => '\u041d\u0443\u0436\u043d\u043e \u0432\u043d\u0438\u043c\u0430\u043d\u0438\u0435';
+  @override
+  String get riskWatch => '\u041f\u043e\u0434 \u043d\u0430\u0431\u043b\u044e\u0434\u0435\u043d\u0438\u0435\u043c';
+  @override
+  String get riskStable => '\u0421\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u043e';
+  @override
+  String riskReasonLabel(String reason) => '\u041f\u0440\u0438\u0447\u0438\u043d\u0430 \u0440\u0438\u0441\u043a\u0430: $reason';
+  @override
+  String get viewTasks => '\u0417\u0430\u0434\u0430\u043d\u0438\u044f';
+  @override
+  String get viewSubmissions => '\u041e\u0442\u0432\u0435\u0442\u044b';
+  @override
+  String studentTasksTitle(String name) => '\u0417\u0430\u0434\u0430\u043d\u0438\u044f: $name';
+  @override
+  String get noStudentTasksYet => '\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u043d\u044b\u0445 \u0437\u0430\u0434\u0430\u043d\u0438\u0439.';
+  @override
+  String get extendDeadline => '\u041f\u0440\u043e\u0434\u043b\u0438\u0442\u044c \u0434\u0435\u0434\u043b\u0430\u0439\u043d';
+  @override
+  String get deadlineUpdated => '\u0414\u0435\u0434\u043b\u0430\u0439\u043d \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d';
+  @override
+  String get weeklyChallengeTitle => '\u041d\u0435\u0434\u0435\u043b\u044c\u043d\u044b\u0439 \u0447\u0435\u043b\u043b\u0435\u043d\u0434\u0436';
+  @override
+  String get weeklyChallengeSubtitle => '\u0421\u0434\u0435\u043b\u0430\u0439\u0442\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435 \u043e\u0441\u043e\u0431\u043e\u0439 \u043c\u0438\u0441\u0441\u0438\u0435\u0439 \u0441 \u0431\u043e\u043d\u0443\u0441\u043d\u044b\u043c XP.';
+  @override
+  String get challengeTitleLabel => '\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0447\u0435\u043b\u043b\u0435\u043d\u0434\u0436\u0430';
+  @override
+  String get challengeCategoryLabel => '\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f \u0447\u0435\u043b\u043b\u0435\u043d\u0434\u0436\u0430';
+  @override
+  String get bonusXpLabel => '\u0411\u043e\u043d\u0443\u0441 XP';
+  @override
+  String get challengeCategoryWeeklyGoal => '\u0426\u0435\u043b\u044c \u043d\u0435\u0434\u0435\u043b\u0438';
+  @override
+  String get challengeCategoryPunctuality => '\u041f\u0443\u043d\u043a\u0442\u0443\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u044c';
+  @override
+  String get challengeCategoryWritingQuality => '\u041a\u0430\u0447\u0435\u0441\u0442\u0432\u043e \u043f\u0438\u0441\u044c\u043c\u0430';
+  @override
+  String get challengeCategoryFocusTime => '\u0412\u0440\u0435\u043c\u044f \u0444\u043e\u043a\u0443\u0441\u0430';
+  @override
+  String get challengeCategoryStreak => '\u0421\u0435\u0440\u0438\u044f';
+  @override
+  String get aiStudyPlanTitle => '\u0418\u0418-\u043f\u043b\u0430\u043d \u043d\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f';
+  @override
+  String get doNowLabel => '\u0421\u0434\u0435\u043b\u0430\u0442\u044c \u0441\u0435\u0439\u0447\u0430\u0441';
+  @override
+  String get doNextLabel => '\u0421\u0434\u0435\u043b\u0430\u0442\u044c \u043f\u043e\u0442\u043e\u043c';
+  @override
+  String stretchGoalLabel(String value) => '\u0414\u043e\u043f. \u0446\u0435\u043b\u044c: $value';
+  @override
+  String mainSkillToImproveLabel(String value) => '\u0413\u043b\u0430\u0432\u043d\u044b\u0439 \u0444\u043e\u043a\u0443\u0441: $value';
+  @override
+  String get openFocusTask => '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0433\u043b\u0430\u0432\u043d\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435';
+  @override
+  String get markFirstDone => '\u041e\u0442\u043c\u0435\u0442\u0438\u0442\u044c \u043f\u0435\u0440\u0432\u044b\u043c \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043d\u044b\u043c';
+  @override
+  String get deadlineRescuePlanTitle => '\u041f\u043b\u0430\u043d \u0441\u043f\u0430\u0441\u0435\u043d\u0438\u044f \u0434\u0435\u0434\u043b\u0430\u0439\u043d\u0430';
+  @override
+  String rescueApproachLabel(String value) => '\u041f\u043e\u0434\u0445\u043e\u0434: $value';
+  @override
+  String rescueRecommendedBlockLabel(String value) => '\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u043e\u0432\u0430\u043d\u043d\u044b\u0439 \u0431\u043b\u043e\u043a: $value';
+  @override
+  String get parentActionFeedTitle => '\u041f\u043e\u0434\u0441\u043a\u0430\u0437\u043a\u0430 \u0434\u043b\u044f \u0440\u043e\u0434\u0438\u0442\u0435\u043b\u044f';
+  @override
+  String tonightLabel(String value) => '\u0421\u0435\u0433\u043e\u0434\u043d\u044f \u0432\u0435\u0447\u0435\u0440\u043e\u043c: $value';
+  @override
+  String recommendedActionTonightLabel(String value) => '\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u043e\u0432\u0430\u043d\u043d\u043e\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043d\u0430 \u0432\u0435\u0447\u0435\u0440: $value';
+  @override
+  String get showDetails => '\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0434\u0435\u0442\u0430\u043b\u0438';
+  @override
+  String get hideDetails => '\u0421\u043a\u0440\u044b\u0442\u044c \u0434\u0435\u0442\u0430\u043b\u0438';
+  @override
+  String get assignSuggestedTask => '\u041d\u0430\u0437\u043d\u0430\u0447\u0438\u0442\u044c \u043f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u043d\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435';
+  @override
+  String get suggestedFollowupAssigned => '\u041f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u043d\u043e\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435 \u043d\u0430\u0437\u043d\u0430\u0447\u0435\u043d\u043e';
+  @override
+  String get reviewSignalsTitle => '\u0421\u0438\u0433\u043d\u0430\u043b\u044b \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438';
+  @override
+  String get strengthsTitle => '\u0421\u0438\u043b\u044c\u043d\u044b\u0435 \u0441\u0442\u043e\u0440\u043e\u043d\u044b';
+  @override
+  String get nextStepsTitle => '\u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0435 \u0448\u0430\u0433\u0438';
+  @override
+  String get aiRubricTitle => '\u0418\u0418-\u0440\u0443\u0431\u0440\u0438\u043a\u0430';
+  @override
+  String get suggestedNextTaskTitle => '\u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u0435 \u0437\u0430\u0434\u0430\u043d\u0438\u0435';
+  @override
+  String difficultyLevelLabel(int value) => '\u0423\u0440\u043e\u0432\u0435\u043d\u044c $value';
+  @override
+  String shortMinutesLabel(int value) => '$value \u043c\u0438\u043d';
+  @override
+  String aiScoreCompactLabel(int value) => '\u0418\u0418 $value/100';
+  @override
+  String confidenceCompactLabel(int value) => '\u0443\u0432\u0435\u0440\u0435\u043d\u043d\u043e\u0441\u0442\u044c $value%';
+  @override
+  String aiScoreDetailedLabel(int value) => '\u041e\u0446\u0435\u043d\u043a\u0430 \u0418\u0418: $value/100';
+  @override
+  String confidenceDetailedLabel(int value) => '\u0423\u0432\u0435\u0440\u0435\u043d\u043d\u043e\u0441\u0442\u044c: $value%';
+  @override
+  String sourceLabel(String value) => '\u0418\u0441\u0442\u043e\u0447\u043d\u0438\u043a: $value';
+  @override
+  String get rubricTemplatesTitle => '\u0428\u0430\u0431\u043b\u043e\u043d\u044b \u0440\u0443\u0431\u0440\u0438\u043a';
+  @override
+  String get presetEssay => '\u042d\u0441\u0441\u0435';
+  @override
+  String get presetShortAnswer => '\u041a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u043e\u0442\u0432\u0435\u0442';
+  @override
+  String get presetMathExplanation => '\u041e\u0431\u044a\u044f\u0441\u043d\u0435\u043d\u0438\u0435 \u043f\u043e \u043c\u0430\u0442\u0435\u043c\u0430\u0442\u0438\u043a\u0435';
+  @override
+  String get presetScienceReport => '\u041d\u0430\u0443\u0447\u043d\u044b\u0439 \u043e\u0442\u0447\u0435\u0442';
+  @override
+  String get presetReadingResponse => '\u041e\u0442\u043a\u043b\u0438\u043a \u043d\u0430 \u0442\u0435\u043a\u0441\u0442';
+  @override
+  String get presetProjectReflection => '\u0420\u0435\u0444\u043b\u0435\u043a\u0441\u0438\u044f \u043f\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0443';
+  @override
+  String highestPriorityLabel(String name, String reason) =>
+      '\u0413\u043b\u0430\u0432\u043d\u044b\u0439 \u043f\u0440\u0438\u043e\u0440\u0438\u0442\u0435\u0442: $name • $reason';
+  @override
+  String challengeXpLabel(String title, int xp) => '$title +$xp XP';
+  @override
+  String positiveSignalLabel(String value) => '\u041f\u043e\u0437\u0438\u0442\u0438\u0432: $value';
+  @override
+  String get aiStatusLoading => '\u0421\u0442\u0430\u0442\u0443\u0441 \u0418\u0418 \u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u0442\u0441\u044f...';
+  @override
+  String get aiStatusUnavailable => '\u0421\u0442\u0430\u0442\u0443\u0441 \u0418\u0418 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d';
+  @override
+  String aiReadyStatus(String providerLabel) => '\u0418\u0418 $providerLabel \u0433\u043e\u0442\u043e\u0432';
+  @override
+  String aiUnavailableStatus(String providerLabel) =>
+      '\u0418\u0418 $providerLabel \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d';
+  @override
+  String get aiModeExternal => '\u0412\u043d\u0435\u0448\u043d\u0438\u0439 \u043f\u0440\u043e\u0432\u0430\u0439\u0434\u0435\u0440';
+  @override
+  String get aiModeBuiltin => '\u0412\u0441\u0442\u0440\u043e\u0435\u043d\u043d\u044b\u0439 \u0440\u0435\u0436\u0438\u043c';
+  @override
+  String get aiModeUnavailable => '\u041d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e';
+  @override
+  String modeLabel(String value) => '\u0420\u0435\u0436\u0438\u043c: $value';
+  @override
+  String providerValueLabel(String value) => '\u041f\u0440\u043e\u0432\u0430\u0439\u0434\u0435\u0440: $value';
+  @override
+  String modelValueLabel(String value) => '\u041c\u043e\u0434\u0435\u043b\u044c: $value';
+  @override
+  String endpointValueLabel(String value) => '\u042d\u043d\u0434\u043f\u043e\u0438\u043d\u0442: $value';
+  @override
+  String get unknownValue => '\u043d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e';
 }

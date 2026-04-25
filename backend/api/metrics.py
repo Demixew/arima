@@ -25,12 +25,12 @@ async def get_my_metrics(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> UserMetricsResponse:
-    metrics = await metrics_service.get_user_metrics(session, current_user.id)
+    metrics = await metrics_service.build_user_metrics_response(session, current_user.id)
 
     if metrics is None:
         raise HTTPException(status_code=404, detail="Metrics not found")
 
-    return UserMetricsResponse.model_validate(metrics)
+    return metrics
 
 @router.get("/me/daily", response_model=list[DailyStatsResponse])
 async def get_my_daily_stats(

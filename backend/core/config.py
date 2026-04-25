@@ -40,8 +40,13 @@ class Settings(BaseSettings):
         alias="JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
     )
 
+    ai_provider: Literal["builtin", "ollama"] = Field(
+        default="builtin",
+        alias="AI_PROVIDER",
+    )
+    ai_model: str | None = Field(default=None, alias="AI_MODEL")
     ollama_url: str = Field(default="http://localhost:11434", alias="OLLAMA_URL")
-    ollama_model: str = Field(default="qwen3.5:4b", alias="OLLAMA_MODEL")
+    ollama_model: str = Field(default="qwen2.5:3b", alias="OLLAMA_MODEL")
     cors_origins: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
@@ -87,6 +92,23 @@ class Settings(BaseSettings):
             return r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
         return None
+
+    @property
+    def resolved_ai_model(self) -> str:
+        if self.ai_provider == "builtin":
+            return "builtin-smart"
+
+        if self.ai_model:
+            return self.ai_model
+
+        return self.ollama_model
+
+    @property
+    def resolved_ai_base_url(self) -> str | None:
+        if self.ai_provider == "ollama":
+            return self.ollama_url.rstrip("/")
+
+        return self.ollama_url.rstrip("/")
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

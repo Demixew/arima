@@ -1,12 +1,14 @@
 
 from __future__ import annotations
 
+import enum
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
     DateTime,
+    Enum,
     ForeignKey,
     Integer,
     SmallInteger,
@@ -38,6 +40,7 @@ class UserMetrics(Base):
 
     avg_completion_time_hours: Mapped[float] = mapped_column(Integer, default=0, nullable=False)
     total_focus_time_minutes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    bonus_xp: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     completion_rate: Mapped[int] = mapped_column(SmallInteger, default=0, nullable=False)
 
@@ -150,6 +153,13 @@ class TeacherStudentLink(Base):
         back_populates="linked_teacher",
     )
 
+
+class AIReviewStatus(str, enum.Enum):
+    not_requested = "not_requested"
+    pending = "pending"
+    ready = "ready"
+    failed = "failed"
+
 class TaskSubmission(Base):
 
     __tablename__ = "task_submissions"
@@ -166,6 +176,25 @@ class TaskSubmission(Base):
     is_graded: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     grade: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
     feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_grade: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    ai_score_percent: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    ai_confidence: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    ai_rating_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    ai_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_strengths_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_improvements_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_rubric_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_risk_flags_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_next_task_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ai_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ai_model: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    ai_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    ai_review_status: Mapped[AIReviewStatus] = mapped_column(
+        Enum(AIReviewStatus, native_enum=False),
+        default=AIReviewStatus.not_requested,
+        nullable=False,
+    )
+    ai_review_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     submitted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../tasks/domain/task_item.dart';
+import '../../tasks/domain/task_review_mode.dart';
+import '../domain/ai_status.dart';
 import '../domain/ai_task_draft.dart';
 import '../domain/linked_student.dart';
 import '../domain/task_submission.dart';
@@ -32,6 +34,15 @@ class TeacherRepository {
     String? description,
     DateTime? dueAt,
     bool requiresSubmission = false,
+    int difficultyLevel = 2,
+    int? estimatedTimeMinutes,
+    bool antiFatigueEnabled = false,
+    bool isChallenge = false,
+    String? challengeTitle,
+    String? challengeCategory,
+    int challengeBonusXp = 0,
+    TaskReviewMode reviewMode = TaskReviewMode.teacherOnly,
+    String? evaluationCriteria,
   }) async {
     final Response<dynamic> response = await _dio.post<dynamic>(
       '/teacher/tasks',
@@ -41,6 +52,19 @@ class TeacherRepository {
         if (description != null) 'description': description,
         if (dueAt != null) 'due_at': dueAt.toUtc().toIso8601String(),
         'requires_submission': requiresSubmission,
+        'difficulty_level': difficultyLevel,
+        if (estimatedTimeMinutes != null)
+          'estimated_time_minutes': estimatedTimeMinutes,
+        'anti_fatigue_enabled': antiFatigueEnabled,
+        'is_challenge': isChallenge,
+        if (challengeTitle != null && challengeTitle.isNotEmpty)
+          'challenge_title': challengeTitle,
+        if (challengeCategory != null && challengeCategory.isNotEmpty)
+          'challenge_category': challengeCategory,
+        'challenge_bonus_xp': challengeBonusXp,
+        'review_mode': reviewMode.apiValue,
+        if (evaluationCriteria != null && evaluationCriteria.isNotEmpty)
+          'evaluation_criteria': evaluationCriteria,
       },
     );
     return TaskItem.fromJson(Map<String, dynamic>.from(response.data as Map));
@@ -94,9 +118,24 @@ class TeacherRepository {
     await _dio.delete<dynamic>('/teacher/students/$studentId/unlink');
   }
 
+  Future<TaskItem> extendTaskDeadline({
+    required int taskId,
+    required DateTime dueAt,
+  }) async {
+    final Response<dynamic> response = await _dio.post<dynamic>(
+      '/teacher/tasks/$taskId/extend-deadline',
+      queryParameters: <String, dynamic>{
+        'due_at': dueAt.toUtc().toIso8601String(),
+      },
+    );
+    return TaskItem.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
   Future<AITaskDraft> generateTaskDraft({
     required int studentId,
     required String prompt,
+    int? difficultyLevel,
+    int? estimatedTimeMinutes,
   }) async {
     try {
       final Response<dynamic> response = await _dio.post<dynamic>(
@@ -104,11 +143,43 @@ class TeacherRepository {
         data: <String, dynamic>{
           'student_id': studentId,
           'prompt': prompt,
+          if (difficultyLevel != null) 'difficulty_level': difficultyLevel,
+          if (estimatedTimeMinutes != null)
+            'estimated_time_minutes': estimatedTimeMinutes,
         },
       );
       return AITaskDraft.fromJson(
         Map<String, dynamic>.from(response.data as Map),
       );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  Future<AiStatus> fetchAiStatus() async {
+    final Response<dynamic> response = await _dio.get<dynamic>('/teacher/ai/status');
+    return AiStatus.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
+  Future<TaskSubmission> runAiReview(int submissionId) async {
+    try {
+      final Response<dynamic> response = await _dio.post<dynamic>(
+        '/teacher/submissions/$submissionId/ai-review',
+      );
+      return TaskSubmission.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
+  Future<TaskItem> assignAiNextTask(int submissionId) async {
+    try {
+      final Response<dynamic> response = await _dio.post<dynamic>(
+        '/teacher/submissions/$submissionId/assign-ai-next-task',
+      );
+      return TaskItem.fromJson(Map<String, dynamic>.from(response.data as Map));
     } on DioException catch (error) {
       throw mapDioException(error);
     }

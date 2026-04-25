@@ -12,9 +12,9 @@ sys.path.insert(0, str(project_root))
 import pytest
 from fastapi.testclient import TestClient
 
-TEST_DB_PATH = Path("tests/test_wata.db")
+TEST_DB_PATH = Path(__file__).resolve().parent / "test_wata.db"
 os.environ["APP_ENV"] = "test"
-os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{TEST_DB_PATH.as_posix()}"
+os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{TEST_DB_PATH.resolve().as_posix()}"
 os.environ["JWT_SECRET"] = "test-secret-key-for-jwt-minimum-32-chars-long"
 
 from backend.core.db import Base, engine

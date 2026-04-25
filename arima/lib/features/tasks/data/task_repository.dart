@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
+import '../domain/study_plan.dart';
 import '../domain/task_item.dart';
 import '../domain/task_status.dart';
 
@@ -27,6 +28,15 @@ class TaskRepository {
     }
   }
 
+  Future<StudyPlan> fetchStudyPlan() async {
+    try {
+      final Response<dynamic> response = await _dio.get<dynamic>('/tasks/study-plan');
+      return StudyPlan.fromJson(Map<String, dynamic>.from(response.data as Map));
+    } on DioException catch (error) {
+      throw mapDioException(error);
+    }
+  }
+
   Future<TaskItem> createTask({
     required String title,
     String? description,
@@ -35,6 +45,9 @@ class TaskRepository {
     bool reminderEnabled = true,
     int remindAfterHours = 6,
     int maxMissedCount = 3,
+    int difficultyLevel = 2,
+    int? estimatedTimeMinutes,
+    bool antiFatigueEnabled = false,
   }) async {
     try {
       final Response<dynamic> response = await _dio.post<dynamic>(
@@ -44,6 +57,10 @@ class TaskRepository {
           'description': description,
           'status': status.apiValue,
           'due_at': dueAt?.toUtc().toIso8601String(),
+          'difficulty_level': difficultyLevel,
+          if (estimatedTimeMinutes != null)
+            'estimated_time_minutes': estimatedTimeMinutes,
+          'anti_fatigue_enabled': antiFatigueEnabled,
           'reminder': <String, dynamic>{
             'is_enabled': reminderEnabled,
             'remind_after_hours': remindAfterHours,
@@ -66,6 +83,9 @@ class TaskRepository {
     required bool reminderEnabled,
     required int remindAfterHours,
     required int maxMissedCount,
+    int difficultyLevel = 2,
+    int? estimatedTimeMinutes,
+    bool antiFatigueEnabled = false,
   }) async {
     try {
       final Response<dynamic> response = await _dio.put<dynamic>(
@@ -75,6 +95,10 @@ class TaskRepository {
           'description': description,
           'status': status.apiValue,
           'due_at': dueAt?.toUtc().toIso8601String(),
+          'difficulty_level': difficultyLevel,
+          if (estimatedTimeMinutes != null)
+            'estimated_time_minutes': estimatedTimeMinutes,
+          'anti_fatigue_enabled': antiFatigueEnabled,
           'reminder': <String, dynamic>{
             'is_enabled': reminderEnabled,
             'remind_after_hours': remindAfterHours,
